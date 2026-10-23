@@ -1,0 +1,689 @@
+import { ShellPalette } from "theme.slint";
+
+export struct FileItemData {
+    name: string,
+    path: string,
+    is_dir: bool,
+    size_str: string,
+    icon: string,
+    file_type: string,
+}
+
+export component AppFiles inherits Rectangle {
+    in-out property <string> current-path: "/home/harry/Projects/defivek";
+    in-out property <[FileItemData]> items;
+    in-out property <int> selected-index: -1;
+    in-out property <string> status-text: "Ready";
+    in-out property <string> error-text: "";
+    in-out property <bool> has-error: false;
+
+    // View mode: default icon grid view (Section 4.1)
+    property <bool> is-grid-view: true;
+
+    callback navigate-to(string);
+    callback navigate-up();
+    callback navigate-back();
+    callback refresh-folder();
+    callback select-item(int);
+    callback open-item(string, bool); // path, is_dir
+
+    background: ShellPalette.window-bg;
+
+    VerticalLayout {
+        spacing: 0px;
+
+        // ==========================================
+        // 1. Navigation & Address Toolbar (40px)
+        // ==========================================
+        Rectangle {
+            height: 40px;
+            background: ShellPalette.surface;
+
+            // Thin bottom separator
+            Rectangle {
+                y: parent.height - 1px;
+                width: parent.width;
+                height: 1px;
+                background: ShellPalette.border-subtle;
+            }
+
+            HorizontalLayout {
+                padding-left: 10px;
+                padding-right: 10px;
+                spacing: 6px;
+
+                // Back Button
+                Rectangle {
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 4px;
+                    background: btn-b.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant;
+                    border-width: 1px;
+                    border-color: ShellPalette.border;
+
+                    Text {
+                        text: "◀";
+                        font-size: 11px;
+                        color: ShellPalette.text-primary;
+                        vertical-alignment: center;
+                        horizontal-alignment: center;
+                    }
+                    btn-b := TouchArea {
+                        clicked => { root.navigate-back(); }
+                    }
+                }
+
+                // Up Directory Button
+                Rectangle {
+                    width: 50px;
+                    height: 28px;
+                    border-radius: 4px;
+                    background: btn-u.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant;
+                    border-width: 1px;
+                    border-color: ShellPalette.border;
+
+                    HorizontalLayout {
+                        alignment: center;
+                        spacing: 4px;
+                        Text { text: "▲"; font-size: 10px; color: ShellPalette.text-primary; vertical-alignment: center; }
+                        Text { text: "Up"; font-size: 11px; font-weight: 600; color: ShellPalette.text-primary; vertical-alignment: center; }
+                    }
+                    btn-u := TouchArea {
+                        clicked => { root.navigate-up(); }
+                    }
+                }
+
+                // Refresh Button
+                Rectangle {
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 4px;
+                    background: btn-r.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant;
+                    border-width: 1px;
+                    border-color: ShellPalette.border;
+
+                    Image {
+                        width: 14px;
+                        height: 14px;
+                        x: (parent.width - 14px) / 2;
+                        y: (parent.height - 14px) / 2;
+                        source: @image-url("../../assets/icons/refresh.svg");
+                    }
+                    btn-r := TouchArea {
+                        clicked => { root.refresh-folder(); }
+                    }
+                }
+
+                // Address / Breadcrumb Bar (Left aligned, expands to available space)
+                Rectangle {
+                    horizontal-stretch: 1;
+                    min-width: 140px;
+                    height: 28px;
+                    border-radius: 4px;
+                    background: ShellPalette.surface-variant;
+                    border-width: 1px;
+                    border-color: ShellPalette.border;
+
+                    HorizontalLayout {
+                        padding-left: 10px;
+                        padding-right: 10px;
+                        spacing: 6px;
+
+                        Image {
+                            width: 14px;
+                            height: 14px;
+                            source: @image-url("../../assets/icons/folder.svg");
+                        }
+                        Text {
+                            text: root.current-path;
+                            font-size: 11px;
+                            font-weight: 500;
+                            color: ShellPalette.text-primary;
+                            vertical-alignment: center;
+                            horizontal-stretch: 1;
+                            overflow: elide;
+                        }
+                    }
+                }
+
+                // View Mode Controls: Grid & List View Toggle
+                Rectangle {
+                    width: 62px;
+                    height: 28px;
+                    border-radius: 4px;
+                    background: ShellPalette.surface-variant;
+                    border-width: 1px;
+                    border-color: ShellPalette.border;
+
+                    HorizontalLayout {
+                        padding: 1px;
+                        spacing: 2px;
+
+                        // Grid View Button
+                        Rectangle {
+                            width: 28px;
+                            height: 24px;
+                            border-radius: 3px;
+                            background: root.is-grid-view ? ShellPalette.accent : (vg-t.has-hover ? ShellPalette.surface-hover : transparent);
+
+                            Text {
+                                text: "▦";
+                                font-size: 12px;
+                                color: root.is-grid-view ? #ffffff : ShellPalette.text-secondary;
+                                horizontal-alignment: center;
+                                vertical-alignment: center;
+                            }
+                            vg-t := TouchArea {
+                                clicked => { root.is-grid-view = true; }
+                            }
+                        }
+
+                        // List View Button
+                        Rectangle {
+                            width: 28px;
+                            height: 24px;
+                            border-radius: 3px;
+                            background: !root.is-grid-view ? ShellPalette.accent : (vl-t.has-hover ? ShellPalette.surface-hover : transparent);
+
+                            Text {
+                                text: "☰";
+                                font-size: 12px;
+                                color: !root.is-grid-view ? #ffffff : ShellPalette.text-secondary;
+                                horizontal-alignment: center;
+                                vertical-alignment: center;
+                            }
+                            vl-t := TouchArea {
+                                clicked => { root.is-grid-view = false; }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ==========================================
+        // 2. Main Workspace: Places Sidebar & Content
+        // ==========================================
+        HorizontalLayout {
+            vertical-stretch: 1;
+            spacing: 0px;
+
+            // Places Sidebar (160px width with aligned icon column)
+            Rectangle {
+                width: 160px;
+                background: ShellPalette.surface-variant;
+
+                // Vertical divider on the right
+                Rectangle {
+                    x: parent.width - 1px;
+                    width: 1px;
+                    height: parent.height;
+                    background: ShellPalette.border-subtle;
+                }
+
+                VerticalLayout {
+                    padding: 8px;
+                    spacing: 3px;
+                    alignment: start;
+
+                    Text {
+                        text: "PLACES";
+                        font-size: 9px;
+                        font-weight: 800;
+                        color: ShellPalette.text-muted;
+                    }
+
+                    // Home (~/)
+                    Rectangle {
+                        height: 28px;
+                        border-radius: 4px;
+                        background: sb-home.has-hover ? ShellPalette.surface-hover : transparent;
+                        HorizontalLayout {
+                            padding-left: 8px;
+                            padding-right: 8px;
+                            spacing: 8px;
+                            Rectangle {
+                                width: 18px; height: 18px;
+                                Image { width: 14px; height: 14px; x: 2px; y: 2px; source: @image-url("../../assets/icons/home.svg"); }
+                            }
+                            Text { text: "Home (~/)"; font-size: 11px; color: ShellPalette.text-primary; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                        }
+                        sb-home := TouchArea { clicked => { root.navigate-to("~"); } }
+                    }
+
+                    // Project root (DeFiveK Desktop)
+                    Rectangle {
+                        height: 28px;
+                        border-radius: 4px;
+                        background: sb-proj.has-hover ? ShellPalette.surface-hover : transparent;
+                        HorizontalLayout {
+                            padding-left: 8px;
+                            padding-right: 8px;
+                            spacing: 8px;
+                            Rectangle {
+                                width: 18px; height: 18px;
+                                Image { width: 14px; height: 14px; x: 2px; y: 2px; source: @image-url("../../assets/icons/defivek-logo.svg"); }
+                            }
+                            Text { text: "DeFiveK Desktop"; font-size: 11px; font-weight: 600; color: ShellPalette.accent; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                        }
+                        sb-proj := TouchArea { clicked => { root.navigate-to("."); } }
+                    }
+
+                    // Documents
+                    Rectangle {
+                        height: 28px;
+                        border-radius: 4px;
+                        background: sb-doc.has-hover ? ShellPalette.surface-hover : transparent;
+                        HorizontalLayout {
+                            padding-left: 8px;
+                            padding-right: 8px;
+                            spacing: 8px;
+                            Rectangle {
+                                width: 18px; height: 18px;
+                                Image { width: 14px; height: 14px; x: 2px; y: 2px; source: @image-url("../../assets/icons/folder.svg"); }
+                            }
+                            Text { text: "Documents"; font-size: 11px; color: ShellPalette.text-primary; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                        }
+                        sb-doc := TouchArea { clicked => { root.navigate-to("~/Documents"); } }
+                    }
+
+                    // Downloads
+                    Rectangle {
+                        height: 28px;
+                        border-radius: 4px;
+                        background: sb-dl.has-hover ? ShellPalette.surface-hover : transparent;
+                        HorizontalLayout {
+                            padding-left: 8px;
+                            padding-right: 8px;
+                            spacing: 8px;
+                            Rectangle {
+                                width: 18px; height: 18px;
+                                Text { text: "📥"; font-size: 13px; horizontal-alignment: center; vertical-alignment: center; }
+                            }
+                            Text { text: "Downloads"; font-size: 11px; color: ShellPalette.text-primary; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                        }
+                        sb-dl := TouchArea { clicked => { root.navigate-to("~/Downloads"); } }
+                    }
+
+                    Rectangle { height: 8px; }
+
+                    Text {
+                        text: "SYSTEM";
+                        font-size: 9px;
+                        font-weight: 800;
+                        color: ShellPalette.text-muted;
+                    }
+
+                    // Root (/)
+                    Rectangle {
+                        height: 28px;
+                        border-radius: 4px;
+                        background: sb-root.has-hover ? ShellPalette.surface-hover : transparent;
+                        HorizontalLayout {
+                            padding-left: 8px;
+                            padding-right: 8px;
+                            spacing: 8px;
+                            Rectangle {
+                                width: 18px; height: 18px;
+                                Text { text: "💽"; font-size: 13px; horizontal-alignment: center; vertical-alignment: center; }
+                            }
+                            Text { text: "Root (/)"; font-size: 11px; color: ShellPalette.text-primary; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                        }
+                        sb-root := TouchArea { clicked => { root.navigate-to("/"); } }
+                    }
+
+                    // /etc
+                    Rectangle {
+                        height: 28px;
+                        border-radius: 4px;
+                        background: sb-etc.has-hover ? ShellPalette.surface-hover : transparent;
+                        HorizontalLayout {
+                            padding-left: 8px;
+                            padding-right: 8px;
+                            spacing: 8px;
+                            Rectangle {
+                                width: 18px; height: 18px;
+                                Text { text: "⚙️"; font-size: 13px; horizontal-alignment: center; vertical-alignment: center; }
+                            }
+                            Text { text: "Config (/etc)"; font-size: 11px; color: ShellPalette.text-primary; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                        }
+                        sb-etc := TouchArea { clicked => { root.navigate-to("/etc"); } }
+                    }
+                }
+            }
+
+            // File Listing Area
+            Rectangle {
+                horizontal-stretch: 1;
+                background: ShellPalette.surface;
+                clip: true;
+
+                // Error View if directory read failed
+                if root.has-error : VerticalLayout {
+                    alignment: center;
+                    spacing: 8px;
+
+                    Text {
+                        text: "⚠️";
+                        font-size: 32px;
+                        horizontal-alignment: center;
+                    }
+                    Text {
+                        text: "Unable to access directory";
+                        font-size: 14px;
+                        font-weight: 700;
+                        color: ShellPalette.danger;
+                        horizontal-alignment: center;
+                    }
+                    Text {
+                        text: root.error-text;
+                        font-size: 11px;
+                        color: ShellPalette.text-secondary;
+                        horizontal-alignment: center;
+                    }
+                    Rectangle { height: 6px; }
+                    Rectangle {
+                        width: 140px;
+                        height: 28px;
+                        x: (parent.width - 140px) / 2;
+                        border-radius: 4px;
+                        background: ShellPalette.accent;
+                        HorizontalLayout {
+                            alignment: center;
+                            Text { text: "Go to Project Root"; font-size: 11px; font-weight: 600; color: #ffffff; vertical-alignment: center; }
+                        }
+                        TouchArea { clicked => { root.navigate-to("."); } }
+                    }
+                }
+
+                // Empty Folder State
+                if !root.has-error && root.items.length == 0 : VerticalLayout {
+                    padding-top: 50px;
+                    alignment: start;
+                    spacing: 8px;
+
+                    Rectangle {
+                        width: 56px;
+                        height: 56px;
+                        x: (parent.width - 56px) / 2;
+                        border-radius: 28px;
+                        background: ShellPalette.surface-variant;
+                        Text { text: "📂"; font-size: 26px; horizontal-alignment: center; vertical-alignment: center; }
+                    }
+                    Text {
+                        text: "This folder is empty";
+                        font-size: 13px;
+                        font-weight: 700;
+                        color: ShellPalette.text-secondary;
+                        horizontal-alignment: center;
+                    }
+                    Text {
+                        text: "No files or directories found in " + root.current-path;
+                        font-size: 11px;
+                        color: ShellPalette.text-muted;
+                        horizontal-alignment: center;
+                    }
+                }
+
+                // Normal File List: DEFAULT ICON GRID VIEW (Section 4.1)
+                // Flow: Upper-left start, left-to-right, top-to-bottom, consistent grid cells
+                if !root.has-error && root.items.length > 0 && root.is-grid-view : grid-flick := Flickable {
+                    property <int> cols: max(1, floor((self.width - 24px) / 106px));
+                    property <int> total-rows: ceil(root.items.length / max(1, self.cols));
+                    content-height: self.total-rows * 98px + 24px;
+
+                    Rectangle {
+                        width: parent.width;
+                        height: parent.content-height;
+
+                        for item[idx] in root.items : Rectangle {
+                            property <int> col-idx: mod(idx, grid-flick.cols);
+                            property <int> row-idx: floor(idx / grid-flick.cols);
+
+                            x: 12px + self.col-idx * 104px;
+                            y: 12px + self.row-idx * 96px;
+                            width: 96px;
+                            height: 88px;
+                            border-radius: 6px;
+                            background: root.selected-index == idx ? ShellPalette.accent-surface : (grid-item-t.has-hover ? ShellPalette.surface-hover : transparent);
+                            border-width: 1px;
+                            border-color: root.selected-index == idx ? ShellPalette.accent : transparent;
+
+                            VerticalLayout {
+                                padding: 6px;
+                                spacing: 4px;
+                                alignment: center;
+
+                                // Icon Box (Centered)
+                                Rectangle {
+                                    width: 42px;
+                                    height: 42px;
+                                    x: (parent.width - 42px) / 2;
+                                    border-radius: 6px;
+                                    background: item.is_dir ? ShellPalette.accent-surface : ShellPalette.surface-variant;
+
+                                    Text {
+                                        text: item.icon;
+                                        font-size: 22px;
+                                        horizontal-alignment: center;
+                                        vertical-alignment: center;
+                                    }
+                                }
+
+                                // Filename (Positioned directly beneath icon, elided cleanly)
+                                Text {
+                                    text: item.name;
+                                    font-size: 11px;
+                                    font-weight: item.is_dir ? 700 : 500;
+                                    color: ShellPalette.text-primary;
+                                    horizontal-alignment: center;
+                                    vertical-alignment: center;
+                                    overflow: elide;
+                                }
+
+                                // Subtitle: size or item count
+                                Text {
+                                    text: item.is_dir ? "Folder" : item.size_str;
+                                    font-size: 9px;
+                                    color: ShellPalette.text-muted;
+                                    horizontal-alignment: center;
+                                    vertical-alignment: center;
+                                    overflow: elide;
+                                }
+                            }
+
+                            grid-item-t := TouchArea {
+                                clicked => {
+                                    root.selected-index = idx;
+                                    root.select-item(idx);
+                                    if (item.is_dir) {
+                                        root.open-item(item.path, true);
+                                    } else {
+                                        root.open-item(item.path, false);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Normal File List: DETAILS / LIST VIEW (Section 4.2)
+                // Left-aligned file listing with consistent columns: Name, Type, Size
+                if !root.has-error && root.items.length > 0 && !root.is-grid-view : VerticalLayout {
+                    spacing: 0px;
+
+                    // Column Headers Bar (Alters no coordinates, aligns with row columns)
+                    Rectangle {
+                        height: 26px;
+                        background: ShellPalette.surface-variant;
+
+                        // Header bottom divider
+                        Rectangle {
+                            y: parent.height - 1px;
+                            width: parent.width;
+                            height: 1px;
+                            background: ShellPalette.border-subtle;
+                        }
+
+                        HorizontalLayout {
+                            padding-left: 14px;
+                            padding-right: 14px;
+                            spacing: 12px;
+
+                            Text {
+                                text: "Name";
+                                font-size: 10px;
+                                font-weight: 700;
+                                color: ShellPalette.text-muted;
+                                vertical-alignment: center;
+                                horizontal-stretch: 1;
+                            }
+
+                            Text {
+                                text: "Type";
+                                font-size: 10px;
+                                font-weight: 700;
+                                color: ShellPalette.text-muted;
+                                vertical-alignment: center;
+                                width: 90px;
+                            }
+
+                            Text {
+                                text: "Size";
+                                font-size: 10px;
+                                font-weight: 700;
+                                color: ShellPalette.text-muted;
+                                vertical-alignment: center;
+                                horizontal-alignment: right;
+                                width: 80px;
+                            }
+                        }
+                    }
+
+                    // Scrollable Rows
+                    Flickable {
+                        vertical-stretch: 1;
+                        content-height: root.items.length * 32px + 12px;
+
+                        VerticalLayout {
+                            padding-top: 4px;
+                            padding-bottom: 4px;
+                            spacing: 2px;
+                            alignment: start;
+
+                            for item[idx] in root.items : Rectangle {
+                                height: 30px;
+                                border-radius: 4px;
+                                background: root.selected-index == idx ? ShellPalette.accent-surface : (list-item-t.has-hover ? ShellPalette.surface-hover : transparent);
+                                border-width: 1px;
+                                border-color: root.selected-index == idx ? ShellPalette.accent : transparent;
+
+                                HorizontalLayout {
+                                    padding-left: 14px;
+                                    padding-right: 14px;
+                                    spacing: 12px;
+
+                                    // Left: Icon + Filename
+                                    HorizontalLayout {
+                                        horizontal-stretch: 1;
+                                        spacing: 8px;
+
+                                        Rectangle {
+                                            width: 18px;
+                                            height: 18px;
+                                            Text {
+                                                text: item.icon;
+                                                font-size: 14px;
+                                                horizontal-alignment: center;
+                                                vertical-alignment: center;
+                                            }
+                                        }
+
+                                        Text {
+                                            text: item.name;
+                                            font-size: 11px;
+                                            font-weight: item.is_dir ? 700 : 500;
+                                            color: ShellPalette.text-primary;
+                                            vertical-alignment: center;
+                                            horizontal-stretch: 1;
+                                            overflow: elide;
+                                        }
+                                    }
+
+                                    // Middle: Type Column
+                                    Text {
+                                        text: item.file_type;
+                                        font-size: 10px;
+                                        color: ShellPalette.text-muted;
+                                        vertical-alignment: center;
+                                        width: 90px;
+                                    }
+
+                                    // Right: Size Column
+                                    Text {
+                                        text: item.size_str;
+                                        font-size: 10px;
+                                        color: ShellPalette.text-secondary;
+                                        vertical-alignment: center;
+                                        horizontal-alignment: right;
+                                        width: 80px;
+                                    }
+                                }
+
+                                list-item-t := TouchArea {
+                                    clicked => {
+                                        root.selected-index = idx;
+                                        root.select-item(idx);
+                                        if (item.is_dir) {
+                                            root.open-item(item.path, true);
+                                        } else {
+                                            root.open-item(item.path, false);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ==========================================
+        // 3. Explorer Bottom Status Bar (24px)
+        // ==========================================
+        Rectangle {
+            height: 24px;
+            background: ShellPalette.surface-variant;
+
+            // Thin top separator
+            Rectangle {
+                y: 0px;
+                width: parent.width;
+                height: 1px;
+                background: ShellPalette.border-subtle;
+            }
+
+            HorizontalLayout {
+                padding-left: 12px;
+                padding-right: 12px;
+
+                Text {
+                    text: root.status-text;
+                    font-size: 10px;
+                    color: ShellPalette.text-secondary;
+                    vertical-alignment: center;
+                }
+
+                Rectangle { horizontal-stretch: 1; }
+
+                Text {
+                    text: "\{root.items.length} items";
+                    font-size: 10px;
+                    font-weight: 600;
+                    color: ShellPalette.text-secondary;
+                    vertical-alignment: center;
+                }
+            }
+        }
+    }
+}

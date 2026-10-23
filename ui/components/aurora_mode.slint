@@ -1,0 +1,457 @@
+import { ShellPalette } from "theme.slint";
+import { WindowFrame } from "window_frame.slint";
+import { AppFiles, FileItemData } from "app_files.slint";
+import { AppTerminal } from "app_terminal.slint";
+import { AppEditor } from "app_editor.slint";
+import { AppSettings } from "app_settings.slint";
+import { AppAbout } from "app_about.slint";
+
+export component AuroraMode inherits Rectangle {
+    in-out property <string> clock-time: "12:00 PM";
+    in-out property <string> clock-date: "Fri Oct 23";
+    in-out property <int> active-workspace: 1; // 1: DEV, 2: WEB, 3: SYS, 4: MEDIA
+    in-out property <bool> is-tiling: true;
+
+    // Window Management State
+    in-out property <bool> win-files-open: true;
+    in-out property <bool> win-files-min: false;
+    in-out property <bool> win-files-focused: false;
+
+    in-out property <bool> win-term-open: true;
+    in-out property <bool> win-term-min: false;
+    in-out property <bool> win-term-focused: true;
+
+    in-out property <bool> win-edit-open: true;
+    in-out property <bool> win-edit-min: false;
+    in-out property <bool> win-edit-focused: false;
+
+    in-out property <bool> win-settings-open: false;
+    in-out property <bool> win-settings-min: false;
+    in-out property <bool> win-settings-focused: false;
+
+    in-out property <bool> win-about-open: false;
+    in-out property <bool> win-about-min: false;
+    in-out property <bool> win-about-focused: false;
+
+    // App Data bindings
+    in-out property <string> files-current-path: "/home/harry/Projects/defivek";
+    in-out property <[FileItemData]> files-items;
+    in-out property <int> files-selected-index: -1;
+    in-out property <string> files-status-text: "Ready";
+    in-out property <string> files-error-text: "";
+    in-out property <bool> files-has-error: false;
+
+    in-out property <string> term-output: "";
+    in-out property <string> host-terminal-name: "Terminal";
+
+    in-out property <string> edit-file-path: "";
+    in-out property <string> edit-file-content: "";
+    in-out property <string> edit-status: "Ready";
+    in-out property <bool> edit-is-modified: false;
+
+    // Callbacks to parent
+    in-out property <string> selected-wallpaper: "aurora-borealis";
+    callback wallpaper-selected(string);
+    callback app-action(string);
+    callback files-navigate(string);
+    callback files-navigate-up();
+    callback files-navigate-back();
+    callback files-refresh();
+    callback files-open-item(string, bool);
+
+    callback term-run-command(string);
+    callback term-launch-host();
+    callback term-clear();
+
+    callback edit-new();
+    callback edit-open-preset(string);
+    callback edit-save(string, string);
+
+    callback settings-mode-selected(int);
+    callback settings-toggle-theme();
+    callback settings-toggle-shell-bar();
+    callback settings-reset();
+
+    // Helper functions
+    function focus_term() {
+        root.win-term-focused = true;
+        root.win-edit-focused = false;
+        root.win-files-focused = false;
+        root.win-settings-focused = false;
+        root.win-about-focused = false;
+    }
+    function focus_edit() {
+        root.win-term-focused = false;
+        root.win-edit-focused = true;
+        root.win-files-focused = false;
+        root.win-settings-focused = false;
+        root.win-about-focused = false;
+    }
+    function focus_files() {
+        root.win-term-focused = false;
+        root.win-edit-focused = false;
+        root.win-files-focused = true;
+        root.win-settings-focused = false;
+        root.win-about-focused = false;
+    }
+    function focus_settings() {
+        root.win-term-focused = false;
+        root.win-edit-focused = false;
+        root.win-files-focused = false;
+        root.win-settings-focused = true;
+        root.win-about-focused = false;
+    }
+    function focus_about() {
+        root.win-term-focused = false;
+        root.win-edit-focused = false;
+        root.win-files-focused = false;
+        root.win-settings-focused = false;
+        root.win-about-focused = true;
+    }
+
+    // Aurora Cybernetic Workspace (Wallpapers rendered by shared engine)
+    background: transparent;
+
+    VerticalLayout {
+        spacing: 6px;
+        padding: 6px;
+
+        // ==========================================
+        // 1. Compact Aurora Top Panel
+        // ==========================================
+        Rectangle {
+            height: 32px;
+            border-radius: 6px;
+            background: ShellPalette.aurora-panel;
+            border-width: 1px;
+            border-color: ShellPalette.border;
+
+            HorizontalLayout {
+                padding-left: 10px;
+                padding-right: 10px;
+                spacing: 12px;
+
+                // Brand Tag
+                HorizontalLayout {
+                    spacing: 6px;
+                    alignment: center;
+                    Image { width: 14px; height: 14px; source: @image-url("../../assets/icons/aurora-logo.svg"); }
+                    Text { text: "AURORA"; font-size: 11px; font-weight: 800; color: ShellPalette.text-primary; vertical-alignment: center; }
+                    Text { text: "// 0.3"; font-size: 10px; color: ShellPalette.aurora-cyan; vertical-alignment: center; }
+                }
+
+                Rectangle { width: 4px; }
+
+                // Workspace Pills
+                HorizontalLayout {
+                    spacing: 4px;
+                    alignment: center;
+
+                    // WS 1: DEV
+                    Rectangle {
+                        width: 60px; height: 22px; border-radius: 4px;
+                        background: root.active-workspace == 1 ? ShellPalette.aurora-cyan : ShellPalette.surface-variant;
+                        Text {
+                            text: "1: DEV"; font-size: 10px; font-weight: 700;
+                            color: root.active-workspace == 1 ? #000000 : ShellPalette.text-secondary;
+                            horizontal-alignment: center; vertical-alignment: center;
+                        }
+                        TouchArea { clicked => { root.active-workspace = 1; root.focus_term(); } }
+                    }
+
+                    // WS 2: WEB
+                    Rectangle {
+                        width: 60px; height: 22px; border-radius: 4px;
+                        background: root.active-workspace == 2 ? ShellPalette.aurora-cyan : ShellPalette.surface-variant;
+                        Text {
+                            text: "2: WEB"; font-size: 10px; font-weight: 700;
+                            color: root.active-workspace == 2 ? #000000 : ShellPalette.text-secondary;
+                            horizontal-alignment: center; vertical-alignment: center;
+                        }
+                        TouchArea { clicked => { root.active-workspace = 2; root.focus_about(); root.win-about-open = true; } }
+                    }
+
+                    // WS 3: SYS
+                    Rectangle {
+                        width: 60px; height: 22px; border-radius: 4px;
+                        background: root.active-workspace == 3 ? ShellPalette.aurora-cyan : ShellPalette.surface-variant;
+                        Text {
+                            text: "3: SYS"; font-size: 10px; font-weight: 700;
+                            color: root.active-workspace == 3 ? #000000 : ShellPalette.text-secondary;
+                            horizontal-alignment: center; vertical-alignment: center;
+                        }
+                        TouchArea { clicked => { root.active-workspace = 3; root.focus_settings(); root.win-settings-open = true; } }
+                    }
+
+                    // WS 4: FILES
+                    Rectangle {
+                        width: 64px; height: 22px; border-radius: 4px;
+                        background: root.active-workspace == 4 ? ShellPalette.aurora-cyan : ShellPalette.surface-variant;
+                        Text {
+                            text: "4: FILES"; font-size: 10px; font-weight: 700;
+                            color: root.active-workspace == 4 ? #000000 : ShellPalette.text-secondary;
+                            horizontal-alignment: center; vertical-alignment: center;
+                        }
+                        TouchArea { clicked => { root.active-workspace = 4; root.focus_files(); root.win-files-open = true; } }
+                    }
+                }
+
+                // Tiling vs Floating layout toggle
+                Rectangle {
+                    width: 76px; height: 22px; border-radius: 4px;
+                    background: root.is-tiling ? ShellPalette.accent : ShellPalette.surface-variant;
+                    border-width: 1px; border-color: ShellPalette.border;
+                    HorizontalLayout {
+                        alignment: center; spacing: 4px;
+                        Text { text: root.is-tiling ? "田 Tiling" : "☷ Float"; font-size: 10px; font-weight: 700; color: root.is-tiling ? #ffffff : ShellPalette.text-primary; vertical-alignment: center; }
+                    }
+                    TouchArea { clicked => { root.is-tiling = !root.is-tiling; } }
+                }
+
+                // Centered Active Window Title
+                Rectangle {
+                    horizontal-stretch: 1;
+                    Text {
+                        text: root.win-term-focused ? "aurora:~/projects/defivek [terminal: zsh]"
+                            : root.win-edit-focused ? "aurora:editor [" + root.edit-file-path + "]"
+                            : root.win-files-focused ? "aurora:files [" + root.files-current-path + "]"
+                            : root.win-settings-focused ? "aurora:settings"
+                            : "aurora:workspace " + root.active-workspace;
+                        font-size: 11px;
+                        font-family: "monospace";
+                        font-weight: 600;
+                        color: ShellPalette.aurora-cyan;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                        overflow: elide;
+                    }
+                }
+
+                // Status & Clock
+                HorizontalLayout {
+                    spacing: 12px;
+                    alignment: center;
+
+                    Text { text: "VirGL: ON"; font-size: 10px; font-weight: 700; color: ShellPalette.success; vertical-alignment: center; }
+                    Text { text: "ARM64"; font-size: 10px; font-weight: 600; color: ShellPalette.text-secondary; vertical-alignment: center; }
+                    Rectangle { width: 1px; height: 16px; background: ShellPalette.border; }
+                    Text {
+                        text: root.clock-date + " " + root.clock-time;
+                        font-size: 10px;
+                        font-weight: 700;
+                        color: ShellPalette.text-primary;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+        }
+
+        // ==========================================
+        // 2. Aurora Main Workspace Canvas
+        // ==========================================
+        workspace := Rectangle {
+            vertical-stretch: 1;
+
+            // --- Layout A: Workspace 1 DEV Tiling Split ---
+            if root.active-workspace == 1 && root.is-tiling : HorizontalLayout {
+                spacing: 8px;
+
+                // Left Master Pane: Terminal (58%)
+                Rectangle {
+                    horizontal-stretch: 58;
+                    border-radius: 6px;
+                    background: ShellPalette.window-bg;
+                    border-width: 1px;
+                    border-color: root.win-term-focused ? ShellPalette.aurora-cyan : ShellPalette.border;
+                    clip: true;
+
+                    VerticalLayout {
+                        spacing: 0px;
+
+                        // Header bar
+                        Rectangle {
+                            height: 28px;
+                            background: ShellPalette.surface-variant;
+                            HorizontalLayout {
+                                padding-left: 10px; padding-right: 10px; spacing: 8px; alignment: center;
+                                Text { text: "💻"; font-size: 12px; vertical-alignment: center; }
+                                Text { text: "TERMINAL [MASTER PANE: 58%]"; font-size: 10px; font-family: "monospace"; font-weight: 700; color: ShellPalette.text-primary; vertical-alignment: center; }
+                                Rectangle { horizontal-stretch: 1; }
+                                Text { text: "zsh (interactive)"; font-size: 9px; font-family: "monospace"; color: ShellPalette.aurora-cyan; vertical-alignment: center; }
+                            }
+                            TouchArea { clicked => { root.focus_term(); } }
+                        }
+
+                        AppTerminal {
+                            vertical-stretch: 1;
+                            terminal-output: root.term-output;
+                            host-terminal-name: root.host-terminal-name;
+                            run-command(cmd) => { root.term-run-command(cmd); }
+                            launch-host-terminal => { root.term-launch-host(); }
+                            clear-output => { root.term-clear(); }
+                        }
+                    }
+                }
+
+                // Right Stack Pane: Text Editor (42%)
+                Rectangle {
+                    horizontal-stretch: 42;
+                    border-radius: 6px;
+                    background: ShellPalette.window-bg;
+                    border-width: 1px;
+                    border-color: root.win-edit-focused ? ShellPalette.aurora-cyan : ShellPalette.border;
+                    clip: true;
+
+                    VerticalLayout {
+                        spacing: 0px;
+
+                        // Header bar
+                        Rectangle {
+                            height: 28px;
+                            background: ShellPalette.surface-variant;
+                            HorizontalLayout {
+                                padding-left: 10px; padding-right: 10px; spacing: 8px; alignment: center;
+                                Text { text: "📝"; font-size: 12px; vertical-alignment: center; }
+                                Text { text: "EDITOR [STACK PANE: 42%]"; font-size: 10px; font-family: "monospace"; font-weight: 700; color: ShellPalette.text-primary; vertical-alignment: center; }
+                                Rectangle { horizontal-stretch: 1; }
+                                Text { text: root.edit-file-path; font-size: 9px; font-family: "monospace"; color: ShellPalette.text-muted; vertical-alignment: center; overflow: elide; }
+                            }
+                            TouchArea { clicked => { root.focus_edit(); } }
+                        }
+
+                        AppEditor {
+                            vertical-stretch: 1;
+                            file-path: root.edit-file-path;
+                            file-content: root.edit-file-content;
+                            status-message: root.edit-status;
+                            is-modified: root.edit-is-modified;
+
+                            new-file => { root.edit-new(); }
+                            open-preset(p) => { root.edit-open-preset(p); }
+                            save-file(p, c) => { root.edit-save(p, c); }
+                        }
+                    }
+                }
+            }
+
+            // --- Layout B: Workspace 2 WEB / DOCS ---
+            if root.active-workspace == 2 : Rectangle {
+                border-radius: 6px;
+                background: ShellPalette.window-bg;
+                border-width: 1px;
+                border-color: ShellPalette.border;
+                clip: true;
+
+                AppAbout {
+                    current-mode: 3;
+                }
+            }
+
+            // --- Layout C: Workspace 3 SYS ---
+            if root.active-workspace == 3 : Rectangle {
+                border-radius: 6px;
+                background: ShellPalette.window-bg;
+                border-width: 1px;
+                border-color: ShellPalette.border;
+                clip: true;
+
+                AppSettings {
+                    current-mode: 3;
+                    dark-mode: ShellPalette.dark-mode;
+                    selected-wallpaper: root.selected-wallpaper;
+                    wallpaper-selected(w) => { root.wallpaper-selected(w); }
+                    mode-selected(m) => { root.settings-mode-selected(m); }
+                    toggle-theme => { root.settings-toggle-theme(); }
+                    toggle-shell-bar => { root.settings-toggle-shell-bar(); }
+                    reset-defaults => { root.settings-reset(); }
+                }
+            }
+
+            // --- Layout D: Workspace 4 MEDIA / FILES ---
+            if root.active-workspace == 4 : Rectangle {
+                border-radius: 6px;
+                background: ShellPalette.window-bg;
+                border-width: 1px;
+                border-color: ShellPalette.border;
+                clip: true;
+
+                AppFiles {
+                    current-path: root.files-current-path;
+                    items: root.files-items;
+                    selected-index: root.files-selected-index;
+                    status-text: root.files-status-text;
+                    error-text: root.files-error-text;
+                    has-error: root.files-has-error;
+
+                    navigate-to(p) => { root.files-navigate(p); }
+                    navigate-up => { root.files-navigate-up(); }
+                    navigate-back => { root.files-navigate-back(); }
+                    refresh-folder => { root.files-refresh(); }
+                    open-item(p, is_dir) => { root.files-open-item(p, is_dir); }
+                }
+            }
+
+            // --- Layout E: Floating Window Mode (When is-tiling is false) ---
+            if !root.is-tiling && root.active-workspace == 1 : Rectangle {
+                // Window 1: Terminal
+                WindowFrame {
+                    title: "Terminal — zsh";
+                    icon: "💻";
+                    win-x: 40px;
+                    win-y: 20px;
+                    win-width: 580px;
+                    win-height: 380px;
+                    max-bounds-width: workspace.width;
+                    max-bounds-height: workspace.height;
+                    is-open: root.win-term-open;
+                    is-minimized: root.win-term-min;
+                    is-focused: root.win-term-focused;
+                    mode-style: 3;
+
+                    focused => { root.focus_term(); }
+                    close-clicked => { root.win-term-open = false; }
+                    minimize-clicked => { root.win-term-min = true; }
+
+                    AppTerminal {
+                        terminal-output: root.term-output;
+                        host-terminal-name: root.host-terminal-name;
+                        run-command(cmd) => { root.term-run-command(cmd); }
+                        launch-host-terminal => { root.term-launch-host(); }
+                        clear-output => { root.term-clear(); }
+                    }
+                }
+
+                // Window 2: Editor
+                WindowFrame {
+                    title: "Editor — " + root.edit-file-path;
+                    icon: "📝";
+                    win-x: 100px;
+                    win-y: 50px;
+                    win-width: 560px;
+                    win-height: 400px;
+                    max-bounds-width: workspace.width;
+                    max-bounds-height: workspace.height;
+                    is-open: root.win-edit-open;
+                    is-minimized: root.win-edit-min;
+                    is-focused: root.win-edit-focused;
+                    mode-style: 3;
+
+                    focused => { root.focus_edit(); }
+                    close-clicked => { root.win-edit-open = false; }
+                    minimize-clicked => { root.win-edit-min = true; }
+
+                    AppEditor {
+                        file-path: root.edit-file-path;
+                        file-content: root.edit-file-content;
+                        status-message: root.edit-status;
+                        is-modified: root.edit-is-modified;
+
+                        new-file => { root.edit-new(); }
+                        open-preset(p) => { root.edit-open-preset(p); }
+                        save-file(p, c) => { root.edit-save(p, c); }
+                    }
+                }
+            }
+        }
+    }
+}

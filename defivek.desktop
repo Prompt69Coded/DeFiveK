@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=DeFiveK Desktop
+Comment=Modular Linux Desktop Shell (Windows, macOS, Android, and Aurora personalities)
+Exec=defivek
+Icon=defivek-logo
+Terminal=false
+Categories=System;Utility;
+Keywords=desktop;shell;environment;defivek;
+StartupNotify=true

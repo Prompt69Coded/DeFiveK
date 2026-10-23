@@ -1,0 +1,107 @@
+// DeFiveK Desktop — About Dialog (Phase 3 Visual Excellence)
+// Displays system specifications, design system summary, and implementation status.
+
+import { ShellPalette } from "theme.slint";
+
+export component AppAbout inherits Rectangle {
+    in-out property <int> current-mode: 0;
+
+    background: ShellPalette.window-bg;
+
+    VerticalLayout {
+        padding: 20px;
+        spacing: 14px;
+        alignment: start;
+
+        // Header with Brand Emblem
+        HorizontalLayout {
+            spacing: 14px;
+            alignment: start;
+
+            Image {
+                width: 48px;
+                height: 48px;
+                source: @image-url("../../assets/icons/defivek-logo.svg");
+            }
+
+            VerticalLayout {
+                spacing: 2px;
+                Text {
+                    text: "DeFiveK Desktop";
+                    font-size: 18px;
+                    font-weight: 800;
+                    color: ShellPalette.text-primary;
+                }
+                Text {
+                    text: "Modular Linux Desktop Shell — Phase 3 Visual Excellence & Personalization";
+                    font-size: 11px;
+                    color: ShellPalette.accent;
+                }
+            }
+        }
+
+        Rectangle { height: 1px; background: ShellPalette.border-subtle; }
+
+        // Mode Status Box
+        Rectangle {
+            height: 44px;
+            border-radius: 6px;
+            background: ShellPalette.surface-variant;
+            border-width: 1px;
+            border-color: ShellPalette.border-subtle;
+
+            HorizontalLayout {
+                padding-left: 12px;
+                padding-right: 12px;
+                alignment: start;
+                spacing: 8px;
+
+                Text { text: "Active Environment:"; font-size: 11px; font-weight: 600; color: ShellPalette.text-secondary; vertical-alignment: center; }
+                Text {
+                    text: root.current-mode == 0 ? "Windows 7 Aero Mode (Bottom Taskbar & Start Menu)"
+                        : root.current-mode == 1 ? "macOS Yosemite Mode (Top Menu Bar & Floating Dock)"
+                        : root.current-mode == 2 ? "Android 10 Desktop Mode (App Grid & Quick Settings)"
+                        : "Aurora Mode (Keyboard-first Tiling Shell)";
+                    font-size: 11px;
+                    font-weight: 700;
+                    color: ShellPalette.accent;
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        // Implementation Status Checklist
+        Text {
+            text: "DELIVERED IN PHASE 3:";
+            font-size: 10px;
+            font-weight: 800;
+            color: ShellPalette.text-muted;
+        }
+
+        VerticalLayout {
+            spacing: 5px;
+            Text { text: "✓ Comprehensive Design Token System with calibrated Light & Dark palettes"; font-size: 11px; color: ShellPalette.text-primary; }
+            Text { text: "✓ Shared Wallpaper Engine with 8 bundled SVG wallpapers & aspect ratio preservation"; font-size: 11px; color: ShellPalette.text-primary; }
+            Text { text: "✓ Dedicated Wallpaper Personalization section in Settings with live preview & gallery"; font-size: 11px; color: ShellPalette.text-primary; }
+            Text { text: "✓ Redesigned Window Chrome with authentic mode-specific vector controls"; font-size: 11px; color: ShellPalette.text-primary; }
+            Text { text: "✓ Coherent Vector Icon System replacing raw emoji substitutes across the shell"; font-size: 11px; color: ShellPalette.text-primary; }
+            Text { text: "✓ Immediate reactive background updating & persistent configuration"; font-size: 11px; color: ShellPalette.text-primary; }
+        }
+
+        Rectangle { height: 1px; background: ShellPalette.border-subtle; }
+
+        Text {
+            text: "RUNTIME SPECIFICATIONS:";
+            font-size: 10px;
+            font-weight: 800;
+            color: ShellPalette.text-muted;
+        }
+
+        VerticalLayout {
+            spacing: 4px;
+            Text { text: "• Target OS: Debian GNU/Linux 13 (Trixie) ARM64 on UTM / Apple Silicon"; font-size: 10px; color: ShellPalette.text-secondary; }
+            Text { text: "• Windowing & Acceleration: X11 / LightDM Session with VirGL 3D Driver"; font-size: 10px; color: ShellPalette.text-secondary; }
+            Text { text: "• Slint Native GUI Toolkit v1.18 with Hardware FemtoVG Renderer"; font-size: 10px; color: ShellPalette.text-secondary; }
+        }
+    }
+}

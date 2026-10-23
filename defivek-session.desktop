@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=DeFiveK Desktop Session
+Comment=Interactive Modular Linux Desktop Environment
+Exec=/usr/local/bin/defivek-session
+TryExec=/usr/local/bin/defivek-session
+Icon=defivek-logo
+DesktopNames=DeFiveK;X-Generic;
+Keywords=launch;defivek;desktop;session;

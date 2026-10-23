@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="forest-sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#02201b"/>
+      <stop offset="40%" stop-color="#064e3b"/>
+      <stop offset="70%" stop-color="#047857"/>
+      <stop offset="90%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#a7f3d0"/>
+    </linearGradient>
+    <radialGradient id="mist-glow" cx="50%" cy="65%" r="55%">
+      <stop offset="0%" stop-color="#d1fae5" stop-opacity="0.45"/>
+      <stop offset="50%" stop-color="#6ee7b7" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#064e3b" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="trees-far" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#065f46"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </linearGradient>
+    <linearGradient id="trees-mid" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#044e3b"/>
+      <stop offset="100%" stop-color="#012019"/>
+    </linearGradient>
+    <linearGradient id="trees-near" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#022c22"/>
+      <stop offset="100%" stop-color="#00140f"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#forest-sky)"/>
+  <rect width="1920" height="1080" fill="url(#mist-glow)"/>
+
+  <!-- Distant Mountain Ridge -->
+  <path d="M-50 1080 L-50 640 L260 520 L580 640 L890 480 L1240 620 L1580 490 L1880 580 L2000 520 L2000 1080 Z" fill="url(#trees-far)" opacity="0.65"/>
+
+  <!-- Midground Mountain Silhouette with Tree Peaks -->
+  <path d="M-50 1080 L-50 780 L180 660 L380 760 L620 630 L880 750 L1150 610 L1420 730 L1690 620 L1950 720 L2000 680 L2000 1080 Z" fill="url(#trees-mid)" opacity="0.85"/>
+
+  <!-- Foreground Evergreen Tree Canopy Silhouette -->
+  <path d="M-50 1080 L-50 860 
+           L40 820 L60 860 L140 800 L160 840 L260 780 L290 840 
+           L420 760 L450 820 L580 750 L610 810 L780 730 L810 790 
+           L980 740 L1010 800 L1160 720 L1190 780 L1350 740 L1380 810 
+           L1540 760 L1570 820 L1720 770 L1750 830 L1920 750 L1950 810 
+           L2000 770 L2000 1080 Z" fill="url(#trees-near)"/>
+
+  <!-- Rising Morning Mist Bands -->
+  <ellipse cx="640" cy="720" rx="480" ry="40" fill="#a7f3d0" opacity="0.25"/>
+  <ellipse cx="1380" cy="680" rx="520" ry="35" fill="#a7f3d0" opacity="0.20"/>
+</svg>

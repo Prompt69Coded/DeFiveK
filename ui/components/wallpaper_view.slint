@@ -1,0 +1,98 @@
+// DeFiveK Desktop — Shared Desktop Wallpaper View (Phase 3)
+// Renders the active desktop wallpaper with aspect ratio preservation and readability scrim.
+
+import { ShellPalette } from "theme.slint";
+
+export component WallpaperView inherits Rectangle {
+    in-out property <string> wallpaper-id: "aurora-borealis";
+    in-out property <bool> dark-mode: true;
+
+    width: 100%;
+    height: 100%;
+    clip: true;
+
+    // Fallback base backdrop
+    background: root.dark-mode ? #080c14 : #e2e8f0;
+
+    // Layer 1: Wallpaper Asset
+    if root.wallpaper-id == "aurora-borealis" : Image {
+        width: 100%;
+        height: 100%;
+        source: @image-url("../../assets/wallpapers/aurora-borealis.svg");
+        image-fit: cover;
+    }
+
+    if root.wallpaper-id == "cosmic-nebula" : Image {
+        width: 100%;
+        height: 100%;
+        source: @image-url("../../assets/wallpapers/cosmic-nebula.svg");
+        image-fit: cover;
+    }
+
+    if root.wallpaper-id == "alpine-sunset" : Image {
+        width: 100%;
+        height: 100%;
+        source: @image-url("../../assets/wallpapers/alpine-sunset.svg");
+        image-fit: cover;
+    }
+
+    if root.wallpaper-id == "oceanic-flow" : Image {
+        width: 100%;
+        height: 100%;
+        source: @image-url("../../assets/wallpapers/oceanic-flow.svg");
+        image-fit: cover;
+    }
+
+    if root.wallpaper-id == "minimal-geometry" : Image {
+        width: 100%;
+        height: 100%;
+        source: @image-url("../../assets/wallpapers/minimal-geometry.svg");
+        image-fit: cover;
+    }
+
+    if root.wallpaper-id == "desert-dunes" : Image {
+        width: 100%;
+        height: 100%;
+        source: @image-url("../../assets/wallpapers/desert-dunes.svg");
+        image-fit: cover;
+    }
+
+    if root.wallpaper-id == "emerald-sanctuary" : Image {
+        width: 100%;
+        height: 100%;
+        source: @image-url("../../assets/wallpapers/emerald-sanctuary.svg");
+        image-fit: cover;
+    }
+
+    if root.wallpaper-id == "solar-radiance" : Image {
+        width: 100%;
+        height: 100%;
+        source: @image-url("../../assets/wallpapers/solar-radiance.svg");
+        image-fit: cover;
+    }
+
+    // Default fallback if wallpaper-id doesn't match any above
+    if root.wallpaper-id != "aurora-borealis" &&
+       root.wallpaper-id != "cosmic-nebula" &&
+       root.wallpaper-id != "alpine-sunset" &&
+       root.wallpaper-id != "oceanic-flow" &&
+       root.wallpaper-id != "minimal-geometry" &&
+       root.wallpaper-id != "desert-dunes" &&
+       root.wallpaper-id != "emerald-sanctuary" &&
+       root.wallpaper-id != "solar-radiance" : Image {
+        width: 100%;
+        height: 100%;
+        source: @image-url("../../assets/wallpapers/aurora-borealis.svg");
+        image-fit: cover;
+    }
+
+    // Layer 2: Contrast Scrim & Vignette
+    // Ensures text labels, icons, panels, and docks are always readable in both themes.
+    Rectangle {
+        width: 100%;
+        height: 100%;
+        background: root.dark-mode
+            ? @linear-gradient(180deg, rgba(8, 12, 20, 0.20) 0%, rgba(8, 12, 20, 0.40) 100%)
+            : @linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(240, 244, 250, 0.25) 100%);
+    }
+}

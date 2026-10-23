@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="sky-sunset" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="35%" stop-color="#3b0764"/>
+      <stop offset="60%" stop-color="#701a75"/>
+      <stop offset="80%" stop-color="#b45309"/>
+      <stop offset="95%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#fef3c7"/>
+    </linearGradient>
+    <radialGradient id="sun-glow" cx="50%" cy="82%" r="40%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.8"/>
+      <stop offset="30%" stop-color="#f59e0b" stop-opacity="0.5"/>
+      <stop offset="70%" stop-color="#e11d48" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#3b0764" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ridge-1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#831843"/>
+      <stop offset="100%" stop-color="#500724"/>
+    </linearGradient>
+    <linearGradient id="ridge-2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4c0519"/>
+      <stop offset="100%" stop-color="#1f030a"/>
+    </linearGradient>
+    <linearGradient id="ridge-3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2a0510"/>
+      <stop offset="100%" stop-color="#090104"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sunset Sky -->
+  <rect width="1920" height="1080" fill="url(#sky-sunset)"/>
+
+  <!-- Sun Sphere & Radial Haze -->
+  <rect width="1920" height="1080" fill="url(#sun-glow)"/>
+  <circle cx="960" cy="800" r="110" fill="#fef9c3" opacity="0.85"/>
+
+  <!-- Mountain Ridge 1 (Furthest Silhouette) -->
+  <path d="M-50 1080 L-50 720 L240 580 L480 680 L760 520 L1020 660 L1280 510 L1560 670 L1840 540 L2000 620 L2000 1080 Z" fill="url(#ridge-1)" opacity="0.85"/>
+
+  <!-- Mountain Ridge 2 (Mid Silhouette) -->
+  <path d="M-50 1080 L-50 820 L180 710 L420 840 L690 690 L960 820 L1210 680 L1490 810 L1760 690 L2000 780 L2000 1080 Z" fill="url(#ridge-2)"/>
+
+  <!-- Mountain Ridge 3 (Foreground Silhouette with Pines) -->
+  <path d="M-50 1080 L-50 900 L120 840 L280 920 L510 820 L740 930 L1040 830 L1310 940 L1620 820 L1890 910 L2000 860 L2000 1080 Z" fill="url(#ridge-3)"/>
+
+  <!-- Evening Twilight Stars in Upper Sky -->
+  <g fill="#ffffff" opacity="0.65">
+    <circle cx="280" cy="120" r="1.5"/>
+    <circle cx="640" cy="80" r="2.0"/>
+    <circle cx="1180" cy="110" r="1.8"/>
+    <circle cx="1580" cy="70" r="1.4"/>
+    <circle cx="1780" cy="160" r="1.6"/>
+    <circle cx="420" cy="220" r="1.2"/>
+    <circle cx="1380" cy="200" r="1.3"/>
+  </g>
+</svg>

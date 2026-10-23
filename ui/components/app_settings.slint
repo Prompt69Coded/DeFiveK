@@ -1,0 +1,880 @@
+// DeFiveK Desktop — Premium Settings & Wallpaper Personalization (Phase 3)
+// Provides dedicated tabbed configuration for Wallpaper, Desktop Paradigm, Theme, and System.
+
+import { ShellPalette } from "theme.slint";
+
+export component AppSettings inherits Rectangle {
+    in-out property <int> current-mode: 0;
+    in-out property <bool> dark-mode: true;
+    in-out property <bool> show-shell-controls: true;
+    in-out property <string> selected-wallpaper: "aurora-borealis";
+    in-out property <string> config-path: "~/.config/defivek/config.toml";
+    in-out property <string> save-status: "Saved to config";
+
+    property <int> active-tab: 0; // 0=Wallpaper, 1=Desktop Mode, 2=Appearance, 3=System
+
+    callback wallpaper-selected(string);
+    callback mode-selected(int);
+    callback toggle-theme();
+    callback toggle-shell-bar();
+    callback reset-defaults();
+
+    background: ShellPalette.window-bg;
+
+    VerticalLayout {
+        spacing: 0px;
+
+        // ==========================================
+        // 1. Settings Navigation Bar / Tabs
+        // ==========================================
+        Rectangle {
+            height: 44px;
+            background: ShellPalette.surface;
+
+            // Bottom Divider
+            Rectangle {
+                y: parent.height - 1px;
+                width: parent.width;
+                height: 1px;
+                background: ShellPalette.border-subtle;
+            }
+
+            HorizontalLayout {
+                padding-left: 16px;
+                padding-right: 16px;
+                padding-top: 6px;
+                padding-bottom: 6px;
+                spacing: 8px;
+                alignment: start;
+
+                // Tab 0: Wallpaper
+                Rectangle {
+                    height: 32px;
+                    width: 110px;
+                    border-radius: 6px;
+                    background: root.active-tab == 0 ? ShellPalette.accent-surface : (tab-w.has-hover ? ShellPalette.surface-hover : transparent);
+                    border-width: 1px;
+                    border-color: root.active-tab == 0 ? ShellPalette.accent : transparent;
+
+                    HorizontalLayout {
+                        alignment: center;
+                        spacing: 6px;
+                        Text {
+                            text: "🖼️";
+                            font-size: 13px;
+                            vertical-alignment: center;
+                        }
+                        Text {
+                            text: "Wallpaper";
+                            font-size: 11px;
+                            font-weight: root.active-tab == 0 ? 700 : 500;
+                            color: root.active-tab == 0 ? ShellPalette.accent : ShellPalette.text-primary;
+                            vertical-alignment: center;
+                        }
+                    }
+                    tab-w := TouchArea { clicked => { root.active-tab = 0; } }
+                }
+
+                // Tab 1: Desktop Mode
+                Rectangle {
+                    height: 32px;
+                    width: 120px;
+                    border-radius: 6px;
+                    background: root.active-tab == 1 ? ShellPalette.accent-surface : (tab-m.has-hover ? ShellPalette.surface-hover : transparent);
+                    border-width: 1px;
+                    border-color: root.active-tab == 1 ? ShellPalette.accent : transparent;
+
+                    HorizontalLayout {
+                        alignment: center;
+                        spacing: 6px;
+                        Text {
+                            text: "🪟";
+                            font-size: 13px;
+                            vertical-alignment: center;
+                        }
+                        Text {
+                            text: "Desktop Mode";
+                            font-size: 11px;
+                            font-weight: root.active-tab == 1 ? 700 : 500;
+                            color: root.active-tab == 1 ? ShellPalette.accent : ShellPalette.text-primary;
+                            vertical-alignment: center;
+                        }
+                    }
+                    tab-m := TouchArea { clicked => { root.active-tab = 1; } }
+                }
+
+                // Tab 2: Appearance & Theme
+                Rectangle {
+                    height: 32px;
+                    width: 110px;
+                    border-radius: 6px;
+                    background: root.active-tab == 2 ? ShellPalette.accent-surface : (tab-t.has-hover ? ShellPalette.surface-hover : transparent);
+                    border-width: 1px;
+                    border-color: root.active-tab == 2 ? ShellPalette.accent : transparent;
+
+                    HorizontalLayout {
+                        alignment: center;
+                        spacing: 6px;
+                        Text {
+                            text: "🌓";
+                            font-size: 13px;
+                            vertical-alignment: center;
+                        }
+                        Text {
+                            text: "Theme";
+                            font-size: 11px;
+                            font-weight: root.active-tab == 2 ? 700 : 500;
+                            color: root.active-tab == 2 ? ShellPalette.accent : ShellPalette.text-primary;
+                            vertical-alignment: center;
+                        }
+                    }
+                    tab-t := TouchArea { clicked => { root.active-tab = 2; } }
+                }
+
+                // Tab 3: System & Info
+                Rectangle {
+                    height: 32px;
+                    width: 100px;
+                    border-radius: 6px;
+                    background: root.active-tab == 3 ? ShellPalette.accent-surface : (tab-s.has-hover ? ShellPalette.surface-hover : transparent);
+                    border-width: 1px;
+                    border-color: root.active-tab == 3 ? ShellPalette.accent : transparent;
+
+                    HorizontalLayout {
+                        alignment: center;
+                        spacing: 6px;
+                        Text {
+                            text: "ℹ️";
+                            font-size: 13px;
+                            vertical-alignment: center;
+                        }
+                        Text {
+                            text: "About";
+                            font-size: 11px;
+                            font-weight: root.active-tab == 3 ? 700 : 500;
+                            color: root.active-tab == 3 ? ShellPalette.accent : ShellPalette.text-primary;
+                            vertical-alignment: center;
+                        }
+                    }
+                    tab-s := TouchArea { clicked => { root.active-tab = 3; } }
+                }
+
+                Rectangle { horizontal-stretch: 1; }
+
+                // Persistence Indicator Pill
+                VerticalLayout {
+                    alignment: center;
+                    Rectangle {
+                        height: 24px;
+                        border-radius: 12px;
+                        background: ShellPalette.surface-variant;
+                        border-width: 1px;
+                        border-color: ShellPalette.border-subtle;
+
+                        HorizontalLayout {
+                            padding-left: 10px;
+                            padding-right: 10px;
+                            spacing: 6px;
+                            alignment: center;
+                            Rectangle {
+                                width: 6px;
+                                height: 6px;
+                                border-radius: 3px;
+                                background: ShellPalette.success;
+                            }
+                            Text {
+                                text: root.save-status;
+                                font-size: 10px;
+                                font-weight: 600;
+                                color: ShellPalette.text-secondary;
+                                vertical-alignment: center;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // ==========================================
+        // 2. Active Tab Content Screen (Scrollable)
+        // ==========================================
+        Flickable {
+            vertical-stretch: 1;
+            content-height: 580px;
+
+            // ------------------------------------------
+            // TAB 0: WALLPAPER GALLERY & PREVIEW
+            // ------------------------------------------
+            if root.active-tab == 0 : VerticalLayout {
+                padding: 18px;
+                spacing: 16px;
+                alignment: start;
+
+                // Section Header
+                VerticalLayout {
+                    spacing: 2px;
+                    Text {
+                        text: "WALLPAPER & DESKTOP BACKGROUND";
+                        font-size: 11px;
+                        font-weight: 800;
+                        color: ShellPalette.accent;
+                    }
+                    Text {
+                        text: "Select a high-resolution bundled wallpaper to personalize your desktop across all four modes.";
+                        font-size: 11px;
+                        color: ShellPalette.text-secondary;
+                    }
+                }
+
+                // Live Wallpaper Preview Banner
+                Rectangle {
+                    height: 120px;
+                    border-radius: 8px;
+                    background: ShellPalette.surface-variant;
+                    border-width: 1px;
+                    border-color: ShellPalette.border;
+                    clip: true;
+
+                    // Active Wallpaper Preview Image
+                    if root.selected-wallpaper == "aurora-borealis" : Image {
+                        width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/aurora-borealis.svg"); image-fit: cover;
+                    }
+                    if root.selected-wallpaper == "cosmic-nebula" : Image {
+                        width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/cosmic-nebula.svg"); image-fit: cover;
+                    }
+                    if root.selected-wallpaper == "alpine-sunset" : Image {
+                        width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/alpine-sunset.svg"); image-fit: cover;
+                    }
+                    if root.selected-wallpaper == "oceanic-flow" : Image {
+                        width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/oceanic-flow.svg"); image-fit: cover;
+                    }
+                    if root.selected-wallpaper == "minimal-geometry" : Image {
+                        width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/minimal-geometry.svg"); image-fit: cover;
+                    }
+                    if root.selected-wallpaper == "desert-dunes" : Image {
+                        width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/desert-dunes.svg"); image-fit: cover;
+                    }
+                    if root.selected-wallpaper == "emerald-sanctuary" : Image {
+                        width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/emerald-sanctuary.svg"); image-fit: cover;
+                    }
+                    if root.selected-wallpaper == "solar-radiance" : Image {
+                        width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/solar-radiance.svg"); image-fit: cover;
+                    }
+
+                    // Scrim overlay on preview
+                    Rectangle {
+                        width: 100%; height: 100%;
+                        background: @linear-gradient(90deg, rgba(12, 15, 23, 0.85) 0%, rgba(12, 15, 23, 0.40) 60%, rgba(12, 15, 23, 0.10) 100%);
+                    }
+
+                    // Banner Text
+                    VerticalLayout {
+                        x: 20px;
+                        y: 20px;
+                        spacing: 4px;
+
+                        HorizontalLayout {
+                            spacing: 8px;
+                            alignment: start;
+                            Rectangle {
+                                height: 20px;
+                                border-radius: 4px;
+                                background: ShellPalette.accent;
+                                HorizontalLayout {
+                                    padding-left: 8px; padding-right: 8px; alignment: center;
+                                    Text { text: "✓ CURRENT ACTIVE"; font-size: 9px; font-weight: 800; color: #ffffff; vertical-alignment: center; }
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: root.selected-wallpaper == "aurora-borealis" ? "Aurora Borealis"
+                                : root.selected-wallpaper == "cosmic-nebula" ? "Cosmic Nebula"
+                                : root.selected-wallpaper == "alpine-sunset" ? "Alpine Sunset"
+                                : root.selected-wallpaper == "oceanic-flow" ? "Oceanic Flow"
+                                : root.selected-wallpaper == "minimal-geometry" ? "Minimal Geometry"
+                                : root.selected-wallpaper == "desert-dunes" ? "Desert Dunes"
+                                : root.selected-wallpaper == "emerald-sanctuary" ? "Emerald Sanctuary"
+                                : "Solar Radiance";
+                            font-size: 16px;
+                            font-weight: 800;
+                            color: #ffffff;
+                        }
+
+                        Text {
+                            text: "Vector SVG • Preserves aspect ratio • Instant persistence";
+                            font-size: 11px;
+                            color: #cbd5e1;
+                        }
+                    }
+                }
+
+                // Wallpaper Gallery Grid (8 Items, 4 per row)
+                Text {
+                    text: "AVAILABLE WALLPAPERS";
+                    font-size: 10px;
+                    font-weight: 800;
+                    color: ShellPalette.text-muted;
+                }
+
+                GridLayout {
+                    spacing: 12px;
+
+                    // Row 1
+                    Row {
+                        // 1. Aurora Borealis
+                        Rectangle {
+                            width: 130px;
+                            height: 104px;
+                            border-radius: 8px;
+                            background: ShellPalette.surface-variant;
+                            border-width: 2px;
+                            border-color: root.selected-wallpaper == "aurora-borealis" ? ShellPalette.accent : (w1-t.has-hover ? ShellPalette.border-strong : ShellPalette.border);
+                            clip: true;
+
+                            VerticalLayout {
+                                spacing: 0px;
+                                Rectangle {
+                                    height: 70px;
+                                    clip: true;
+                                    Image { width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/aurora-borealis.svg"); image-fit: cover; }
+                                    if root.selected-wallpaper == "aurora-borealis" : Rectangle {
+                                        x: parent.width - 20px; y: 4px; width: 16px; height: 16px; border-radius: 8px; background: ShellPalette.accent;
+                                        Text { text: "✓"; font-size: 9px; font-weight: 800; color: #ffffff; vertical-alignment: center; horizontal-alignment: center; }
+                                    }
+                                }
+                                Rectangle {
+                                    vertical-stretch: 1;
+                                    background: ShellPalette.surface;
+                                    VerticalLayout {
+                                        padding-left: 6px; padding-right: 6px; alignment: start; spacing: 1px;
+                                        Text { text: "Aurora Borealis"; font-size: 10px; font-weight: 700; color: ShellPalette.text-primary; overflow: elide; }
+                                        Text { text: "Northern Lights"; font-size: 8px; color: ShellPalette.text-secondary; }
+                                    }
+                                }
+                            }
+                            w1-t := TouchArea { clicked => { root.wallpaper-selected("aurora-borealis"); } }
+                        }
+
+                        // 2. Cosmic Nebula
+                        Rectangle {
+                            width: 130px;
+                            height: 104px;
+                            border-radius: 8px;
+                            background: ShellPalette.surface-variant;
+                            border-width: 2px;
+                            border-color: root.selected-wallpaper == "cosmic-nebula" ? ShellPalette.accent : (w2-t.has-hover ? ShellPalette.border-strong : ShellPalette.border);
+                            clip: true;
+
+                            VerticalLayout {
+                                spacing: 0px;
+                                Rectangle {
+                                    height: 70px;
+                                    clip: true;
+                                    Image { width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/cosmic-nebula.svg"); image-fit: cover; }
+                                    if root.selected-wallpaper == "cosmic-nebula" : Rectangle {
+                                        x: parent.width - 20px; y: 4px; width: 16px; height: 16px; border-radius: 8px; background: ShellPalette.accent;
+                                        Text { text: "✓"; font-size: 9px; font-weight: 800; color: #ffffff; vertical-alignment: center; horizontal-alignment: center; }
+                                    }
+                                }
+                                Rectangle {
+                                    vertical-stretch: 1;
+                                    background: ShellPalette.surface;
+                                    VerticalLayout {
+                                        padding-left: 6px; padding-right: 6px; alignment: start; spacing: 1px;
+                                        Text { text: "Cosmic Nebula"; font-size: 10px; font-weight: 700; color: ShellPalette.text-primary; overflow: elide; }
+                                        Text { text: "Deep Space"; font-size: 8px; color: ShellPalette.text-secondary; }
+                                    }
+                                }
+                            }
+                            w2-t := TouchArea { clicked => { root.wallpaper-selected("cosmic-nebula"); } }
+                        }
+
+                        // 3. Alpine Sunset
+                        Rectangle {
+                            width: 130px;
+                            height: 104px;
+                            border-radius: 8px;
+                            background: ShellPalette.surface-variant;
+                            border-width: 2px;
+                            border-color: root.selected-wallpaper == "alpine-sunset" ? ShellPalette.accent : (w3-t.has-hover ? ShellPalette.border-strong : ShellPalette.border);
+                            clip: true;
+
+                            VerticalLayout {
+                                spacing: 0px;
+                                Rectangle {
+                                    height: 70px;
+                                    clip: true;
+                                    Image { width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/alpine-sunset.svg"); image-fit: cover; }
+                                    if root.selected-wallpaper == "alpine-sunset" : Rectangle {
+                                        x: parent.width - 20px; y: 4px; width: 16px; height: 16px; border-radius: 8px; background: ShellPalette.accent;
+                                        Text { text: "✓"; font-size: 9px; font-weight: 800; color: #ffffff; vertical-alignment: center; horizontal-alignment: center; }
+                                    }
+                                }
+                                Rectangle {
+                                    vertical-stretch: 1;
+                                    background: ShellPalette.surface;
+                                    VerticalLayout {
+                                        padding-left: 6px; padding-right: 6px; alignment: start; spacing: 1px;
+                                        Text { text: "Alpine Sunset"; font-size: 10px; font-weight: 700; color: ShellPalette.text-primary; overflow: elide; }
+                                        Text { text: "Mountain Ridge"; font-size: 8px; color: ShellPalette.text-secondary; }
+                                    }
+                                }
+                            }
+                            w3-t := TouchArea { clicked => { root.wallpaper-selected("alpine-sunset"); } }
+                        }
+
+                        // 4. Oceanic Flow
+                        Rectangle {
+                            width: 130px;
+                            height: 104px;
+                            border-radius: 8px;
+                            background: ShellPalette.surface-variant;
+                            border-width: 2px;
+                            border-color: root.selected-wallpaper == "oceanic-flow" ? ShellPalette.accent : (w4-t.has-hover ? ShellPalette.border-strong : ShellPalette.border);
+                            clip: true;
+
+                            VerticalLayout {
+                                spacing: 0px;
+                                Rectangle {
+                                    height: 70px;
+                                    clip: true;
+                                    Image { width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/oceanic-flow.svg"); image-fit: cover; }
+                                    if root.selected-wallpaper == "oceanic-flow" : Rectangle {
+                                        x: parent.width - 20px; y: 4px; width: 16px; height: 16px; border-radius: 8px; background: ShellPalette.accent;
+                                        Text { text: "✓"; font-size: 9px; font-weight: 800; color: #ffffff; vertical-alignment: center; horizontal-alignment: center; }
+                                    }
+                                }
+                                Rectangle {
+                                    vertical-stretch: 1;
+                                    background: ShellPalette.surface;
+                                    VerticalLayout {
+                                        padding-left: 6px; padding-right: 6px; alignment: start; spacing: 1px;
+                                        Text { text: "Oceanic Flow"; font-size: 10px; font-weight: 700; color: ShellPalette.text-primary; overflow: elide; }
+                                        Text { text: "Marine Wave"; font-size: 8px; color: ShellPalette.text-secondary; }
+                                    }
+                                }
+                            }
+                            w4-t := TouchArea { clicked => { root.wallpaper-selected("oceanic-flow"); } }
+                        }
+                    }
+
+                    // Row 2
+                    Row {
+                        // 5. Minimal Geometry
+                        Rectangle {
+                            width: 130px;
+                            height: 104px;
+                            border-radius: 8px;
+                            background: ShellPalette.surface-variant;
+                            border-width: 2px;
+                            border-color: root.selected-wallpaper == "minimal-geometry" ? ShellPalette.accent : (w5-t.has-hover ? ShellPalette.border-strong : ShellPalette.border);
+                            clip: true;
+
+                            VerticalLayout {
+                                spacing: 0px;
+                                Rectangle {
+                                    height: 70px;
+                                    clip: true;
+                                    Image { width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/minimal-geometry.svg"); image-fit: cover; }
+                                    if root.selected-wallpaper == "minimal-geometry" : Rectangle {
+                                        x: parent.width - 20px; y: 4px; width: 16px; height: 16px; border-radius: 8px; background: ShellPalette.accent;
+                                        Text { text: "✓"; font-size: 9px; font-weight: 800; color: #ffffff; vertical-alignment: center; horizontal-alignment: center; }
+                                    }
+                                }
+                                Rectangle {
+                                    vertical-stretch: 1;
+                                    background: ShellPalette.surface;
+                                    VerticalLayout {
+                                        padding-left: 6px; padding-right: 6px; alignment: start; spacing: 1px;
+                                        Text { text: "Minimal Geometry"; font-size: 10px; font-weight: 700; color: ShellPalette.text-primary; overflow: elide; }
+                                        Text { text: "Faceted Origami"; font-size: 8px; color: ShellPalette.text-secondary; }
+                                    }
+                                }
+                            }
+                            w5-t := TouchArea { clicked => { root.wallpaper-selected("minimal-geometry"); } }
+                        }
+
+                        // 6. Desert Dunes
+                        Rectangle {
+                            width: 130px;
+                            height: 104px;
+                            border-radius: 8px;
+                            background: ShellPalette.surface-variant;
+                            border-width: 2px;
+                            border-color: root.selected-wallpaper == "desert-dunes" ? ShellPalette.accent : (w6-t.has-hover ? ShellPalette.border-strong : ShellPalette.border);
+                            clip: true;
+
+                            VerticalLayout {
+                                spacing: 0px;
+                                Rectangle {
+                                    height: 70px;
+                                    clip: true;
+                                    Image { width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/desert-dunes.svg"); image-fit: cover; }
+                                    if root.selected-wallpaper == "desert-dunes" : Rectangle {
+                                        x: parent.width - 20px; y: 4px; width: 16px; height: 16px; border-radius: 8px; background: ShellPalette.accent;
+                                        Text { text: "✓"; font-size: 9px; font-weight: 800; color: #ffffff; vertical-alignment: center; horizontal-alignment: center; }
+                                    }
+                                }
+                                Rectangle {
+                                    vertical-stretch: 1;
+                                    background: ShellPalette.surface;
+                                    VerticalLayout {
+                                        padding-left: 6px; padding-right: 6px; alignment: start; spacing: 1px;
+                                        Text { text: "Desert Dunes"; font-size: 10px; font-weight: 700; color: ShellPalette.text-primary; overflow: elide; }
+                                        Text { text: "Warm Terracotta"; font-size: 8px; color: ShellPalette.text-secondary; }
+                                    }
+                                }
+                            }
+                            w6-t := TouchArea { clicked => { root.wallpaper-selected("desert-dunes"); } }
+                        }
+
+                        // 7. Emerald Sanctuary
+                        Rectangle {
+                            width: 130px;
+                            height: 104px;
+                            border-radius: 8px;
+                            background: ShellPalette.surface-variant;
+                            border-width: 2px;
+                            border-color: root.selected-wallpaper == "emerald-sanctuary" ? ShellPalette.accent : (w7-t.has-hover ? ShellPalette.border-strong : ShellPalette.border);
+                            clip: true;
+
+                            VerticalLayout {
+                                spacing: 0px;
+                                Rectangle {
+                                    height: 70px;
+                                    clip: true;
+                                    Image { width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/emerald-sanctuary.svg"); image-fit: cover; }
+                                    if root.selected-wallpaper == "emerald-sanctuary" : Rectangle {
+                                        x: parent.width - 20px; y: 4px; width: 16px; height: 16px; border-radius: 8px; background: ShellPalette.accent;
+                                        Text { text: "✓"; font-size: 9px; font-weight: 800; color: #ffffff; vertical-alignment: center; horizontal-alignment: center; }
+                                    }
+                                }
+                                Rectangle {
+                                    vertical-stretch: 1;
+                                    background: ShellPalette.surface;
+                                    VerticalLayout {
+                                        padding-left: 6px; padding-right: 6px; alignment: start; spacing: 1px;
+                                        Text { text: "Emerald Sanctuary"; font-size: 10px; font-weight: 700; color: ShellPalette.text-primary; overflow: elide; }
+                                        Text { text: "Misty Forest"; font-size: 8px; color: ShellPalette.text-secondary; }
+                                    }
+                                }
+                            }
+                            w7-t := TouchArea { clicked => { root.wallpaper-selected("emerald-sanctuary"); } }
+                        }
+
+                        // 8. Solar Radiance
+                        Rectangle {
+                            width: 130px;
+                            height: 104px;
+                            border-radius: 8px;
+                            background: ShellPalette.surface-variant;
+                            border-width: 2px;
+                            border-color: root.selected-wallpaper == "solar-radiance" ? ShellPalette.accent : (w8-t.has-hover ? ShellPalette.border-strong : ShellPalette.border);
+                            clip: true;
+
+                            VerticalLayout {
+                                spacing: 0px;
+                                Rectangle {
+                                    height: 70px;
+                                    clip: true;
+                                    Image { width: 100%; height: 100%; source: @image-url("../../assets/wallpapers/solar-radiance.svg"); image-fit: cover; }
+                                    if root.selected-wallpaper == "solar-radiance" : Rectangle {
+                                        x: parent.width - 20px; y: 4px; width: 16px; height: 16px; border-radius: 8px; background: ShellPalette.accent;
+                                        Text { text: "✓"; font-size: 9px; font-weight: 800; color: #ffffff; vertical-alignment: center; horizontal-alignment: center; }
+                                    }
+                                }
+                                Rectangle {
+                                    vertical-stretch: 1;
+                                    background: ShellPalette.surface;
+                                    VerticalLayout {
+                                        padding-left: 6px; padding-right: 6px; alignment: start; spacing: 1px;
+                                        Text { text: "Solar Radiance"; font-size: 10px; font-weight: 700; color: ShellPalette.text-primary; overflow: elide; }
+                                        Text { text: "Golden Dawn"; font-size: 8px; color: ShellPalette.text-secondary; }
+                                    }
+                                }
+                            }
+                            w8-t := TouchArea { clicked => { root.wallpaper-selected("solar-radiance"); } }
+                        }
+                    }
+                }
+            }
+
+            // ------------------------------------------
+            // TAB 1: DESKTOP MODE & PARADIGM
+            // ------------------------------------------
+            if root.active-tab == 1 : VerticalLayout {
+                padding: 18px;
+                spacing: 16px;
+                alignment: start;
+
+                VerticalLayout {
+                    spacing: 2px;
+                    Text {
+                        text: "DESKTOP MODE & INTERACTION PARADIGM";
+                        font-size: 11px;
+                        font-weight: 800;
+                        color: ShellPalette.accent;
+                    }
+                    Text {
+                        text: "Switch between four curated interaction environments. Settings and open windows are preserved.";
+                        font-size: 11px;
+                        color: ShellPalette.text-secondary;
+                    }
+                }
+
+                GridLayout {
+                    spacing: 12px;
+
+                    Row {
+                        // Windows 7 Tile
+                        Rectangle {
+                            width: 260px;
+                            height: 78px;
+                            border-radius: 8px;
+                            background: root.current-mode == 0 ? ShellPalette.accent-surface : (w-touch.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant);
+                            border-width: 2px;
+                            border-color: root.current-mode == 0 ? ShellPalette.accent : ShellPalette.border;
+
+                            VerticalLayout {
+                                padding: 10px;
+                                spacing: 4px;
+                                HorizontalLayout {
+                                    spacing: 8px;
+                                    Text { text: "🪟"; font-size: 18px; vertical-alignment: center; }
+                                    Text { text: "Windows 7 Mode"; font-size: 12px; font-weight: 700; color: ShellPalette.text-primary; vertical-alignment: center; }
+                                }
+                                Text { text: "Bottom Aero taskbar, Start launcher panel, system tray, desktop shortcuts."; font-size: 9px; color: ShellPalette.text-secondary; }
+                            }
+                            w-touch := TouchArea { clicked => { root.mode-selected(0); } }
+                        }
+
+                        // macOS Tile
+                        Rectangle {
+                            width: 260px;
+                            height: 78px;
+                            border-radius: 8px;
+                            background: root.current-mode == 1 ? ShellPalette.accent-surface : (m-touch.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant);
+                            border-width: 2px;
+                            border-color: root.current-mode == 1 ? ShellPalette.accent : ShellPalette.border;
+
+                            VerticalLayout {
+                                padding: 10px;
+                                spacing: 4px;
+                                HorizontalLayout {
+                                    spacing: 8px;
+                                    Text { text: "🍎"; font-size: 18px; vertical-alignment: center; }
+                                    Text { text: "OS X Yosemite Mode"; font-size: 12px; font-weight: 700; color: ShellPalette.text-primary; vertical-alignment: center; }
+                                }
+                                Text { text: "Top menu bar, floating frosted glass dock, traffic light window controls."; font-size: 9px; color: ShellPalette.text-secondary; }
+                            }
+                            m-touch := TouchArea { clicked => { root.mode-selected(1); } }
+                        }
+                    }
+
+                    Row {
+                        // Android Tile
+                        Rectangle {
+                            width: 260px;
+                            height: 78px;
+                            border-radius: 8px;
+                            background: root.current-mode == 2 ? ShellPalette.accent-surface : (a-touch.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant);
+                            border-width: 2px;
+                            border-color: root.current-mode == 2 ? ShellPalette.accent : ShellPalette.border;
+
+                            VerticalLayout {
+                                padding: 10px;
+                                spacing: 4px;
+                                HorizontalLayout {
+                                    spacing: 8px;
+                                    Text { text: "🤖"; font-size: 18px; vertical-alignment: center; }
+                                    Text { text: "Android 10 Desktop"; font-size: 12px; font-weight: 700; color: ShellPalette.text-primary; vertical-alignment: center; }
+                                }
+                                Text { text: "Top status bar, Google-style search pill, squircle app grid tiles, quick toggles."; font-size: 9px; color: ShellPalette.text-secondary; }
+                            }
+                            a-touch := TouchArea { clicked => { root.mode-selected(2); } }
+                        }
+
+                        // Aurora Tile
+                        Rectangle {
+                            width: 260px;
+                            height: 78px;
+                            border-radius: 8px;
+                            background: root.current-mode == 3 ? ShellPalette.accent-surface : (au-touch.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant);
+                            border-width: 2px;
+                            border-color: root.current-mode == 3 ? ShellPalette.accent : ShellPalette.border;
+
+                            VerticalLayout {
+                                padding: 10px;
+                                spacing: 4px;
+                                HorizontalLayout {
+                                    spacing: 8px;
+                                    Text { text: "⚡"; font-size: 18px; vertical-alignment: center; }
+                                    Text { text: "Aurora Tiling Mode"; font-size: 12px; font-weight: 700; color: ShellPalette.text-primary; vertical-alignment: center; }
+                                }
+                                Text { text: "Original lightweight keyboard-first shell, workspaces [1-4], split panes."; font-size: 9px; color: ShellPalette.text-secondary; }
+                            }
+                            au-touch := TouchArea { clicked => { root.mode-selected(3); } }
+                        }
+                    }
+                }
+            }
+
+            // ------------------------------------------
+            // TAB 2: APPEARANCE & COLOR THEME
+            // ------------------------------------------
+            if root.active-tab == 2 : VerticalLayout {
+                padding: 18px;
+                spacing: 16px;
+                alignment: start;
+
+                VerticalLayout {
+                    spacing: 2px;
+                    Text {
+                        text: "COLOR PALETTE & THEME SYSTEM";
+                        font-size: 11px;
+                        font-weight: 800;
+                        color: ShellPalette.accent;
+                    }
+                    Text {
+                        text: "Select Dark or Light theme. The entire desktop shell, windows, and panels update reactively.";
+                        font-size: 11px;
+                        color: ShellPalette.text-secondary;
+                    }
+                }
+
+                HorizontalLayout {
+                    spacing: 16px;
+
+                    // Dark Theme Card
+                    Rectangle {
+                        width: 240px;
+                        height: 120px;
+                        border-radius: 8px;
+                        background: root.dark-mode ? ShellPalette.accent-surface : (tc-d.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant);
+                        border-width: 2px;
+                        border-color: root.dark-mode ? ShellPalette.accent : ShellPalette.border;
+
+                        VerticalLayout {
+                            padding: 12px;
+                            spacing: 8px;
+                            HorizontalLayout {
+                                spacing: 8px;
+                                Text { text: "☾"; font-size: 20px; color: #38bdf8; vertical-alignment: center; }
+                                VerticalLayout {
+                                    spacing: 2px;
+                                    Text { text: "Dark Theme"; font-size: 13px; font-weight: 700; color: ShellPalette.text-primary; }
+                                    Text { text: "Deep obsidian & slate surfaces"; font-size: 9px; color: ShellPalette.text-secondary; }
+                                }
+                            }
+                            Rectangle {
+                                height: 26px; border-radius: 4px;
+                                background: root.dark-mode ? ShellPalette.accent : ShellPalette.surface;
+                                HorizontalLayout { alignment: center; Text { text: root.dark-mode ? "✓ Active Theme" : "Select Dark"; font-size: 10px; font-weight: 700; color: root.dark-mode ? #ffffff : ShellPalette.text-primary; vertical-alignment: center; } }
+                            }
+                        }
+                        tc-d := TouchArea { clicked => { if (!root.dark-mode) { root.toggle-theme(); } } }
+                    }
+
+                    // Light Theme Card
+                    Rectangle {
+                        width: 240px;
+                        height: 120px;
+                        border-radius: 8px;
+                        background: !root.dark-mode ? ShellPalette.accent-surface : (tc-l.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant);
+                        border-width: 2px;
+                        border-color: !root.dark-mode ? ShellPalette.accent : ShellPalette.border;
+
+                        VerticalLayout {
+                            padding: 12px;
+                            spacing: 8px;
+                            HorizontalLayout {
+                                spacing: 8px;
+                                Text { text: "☀"; font-size: 20px; color: #f59e0b; vertical-alignment: center; }
+                                VerticalLayout {
+                                    spacing: 2px;
+                                    Text { text: "Light Theme"; font-size: 13px; font-weight: 700; color: ShellPalette.text-primary; }
+                                    Text { text: "Clean alabaster & crisp cards"; font-size: 9px; color: ShellPalette.text-secondary; }
+                                }
+                            }
+                            Rectangle {
+                                height: 26px; border-radius: 4px;
+                                background: !root.dark-mode ? ShellPalette.accent : ShellPalette.surface;
+                                HorizontalLayout { alignment: center; Text { text: !root.dark-mode ? "✓ Active Theme" : "Select Light"; font-size: 10px; font-weight: 700; color: !root.dark-mode ? #ffffff : ShellPalette.text-primary; vertical-alignment: center; } }
+                            }
+                        }
+                        tc-l := TouchArea { clicked => { if (root.dark-mode) { root.toggle-theme(); } } }
+                    }
+                }
+            }
+
+            // ------------------------------------------
+            // TAB 3: SYSTEM INFO & PERSISTENCE
+            // ------------------------------------------
+            if root.active-tab == 3 : VerticalLayout {
+                padding: 18px;
+                spacing: 16px;
+                alignment: start;
+
+                VerticalLayout {
+                    spacing: 2px;
+                    Text {
+                        text: "SYSTEM SPECIFICATIONS & CONFIGURATION";
+                        font-size: 11px;
+                        font-weight: 800;
+                        color: ShellPalette.accent;
+                    }
+                    Text {
+                        text: "Target environment details and persistent storage status.";
+                        font-size: 11px;
+                        color: ShellPalette.text-secondary;
+                    }
+                }
+
+                Rectangle {
+                    border-radius: 8px;
+                    background: ShellPalette.surface-variant;
+                    border-width: 1px;
+                    border-color: ShellPalette.border-subtle;
+
+                    VerticalLayout {
+                        padding: 14px;
+                        spacing: 8px;
+                        Text { text: "• Desktop Shell: DeFiveK Desktop v0.3.0 (Phase 3 Visual Polish)"; font-size: 11px; font-weight: 600; color: ShellPalette.text-primary; }
+                        Text { text: "• Target System: Debian GNU/Linux 13 (Trixie) ARM64 / UTM Virtual Machine"; font-size: 11px; color: ShellPalette.text-primary; }
+                        Text { text: "• Graphics: X11 / LightDM Session with VirGL 3D Hardware Acceleration"; font-size: 11px; color: ShellPalette.text-primary; }
+                        Text { text: "• GUI Framework: Slint v1.18 Native Rust GUI with FemtoVG renderer"; font-size: 11px; color: ShellPalette.text-primary; }
+                        Text { text: "• Config File: " + root.config-path; font-size: 11px; font-family: "monospace"; color: ShellPalette.accent; }
+                    }
+                }
+
+                HorizontalLayout {
+                    spacing: 12px;
+                    alignment: start;
+
+                    Rectangle {
+                        width: 150px;
+                        height: 32px;
+                        border-radius: 6px;
+                        background: rst-btn.has-hover ? #ef4444 : ShellPalette.surface-variant;
+                        border-width: 1px;
+                        border-color: ShellPalette.border;
+
+                        HorizontalLayout {
+                            alignment: center;
+                            spacing: 6px;
+                            Text {
+                                text: "↺ Reset Defaults";
+                                font-size: 11px;
+                                font-weight: 700;
+                                color: rst-btn.has-hover ? #ffffff : ShellPalette.text-primary;
+                                vertical-alignment: center;
+                            }
+                        }
+                        rst-btn := TouchArea { clicked => { root.reset-defaults(); } }
+                    }
+                }
+            }
+        }
+    }
+}

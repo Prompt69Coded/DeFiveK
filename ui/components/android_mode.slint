@@ -1,0 +1,755 @@
+import { ShellPalette } from "theme.slint";
+import { WindowFrame } from "window_frame.slint";
+import { AppFiles, FileItemData } from "app_files.slint";
+import { AppTerminal } from "app_terminal.slint";
+import { AppEditor } from "app_editor.slint";
+import { AppSettings } from "app_settings.slint";
+import { AppAbout } from "app_about.slint";
+
+export component AndroidMode inherits Rectangle {
+    in-out property <string> clock-time: "12:00 PM";
+    in-out property <string> clock-date: "Friday, Oct 23";
+    in-out property <bool> quick-settings-open: false;
+    in-out property <string> search-query: "";
+
+    // Window Management State
+    in-out property <bool> win-files-open: true;
+    in-out property <bool> win-files-min: false;
+    in-out property <bool> win-files-focused: true;
+
+    in-out property <bool> win-term-open: false;
+    in-out property <bool> win-term-min: false;
+    in-out property <bool> win-term-focused: false;
+
+    in-out property <bool> win-edit-open: false;
+    in-out property <bool> win-edit-min: false;
+    in-out property <bool> win-edit-focused: false;
+
+    in-out property <bool> win-settings-open: false;
+    in-out property <bool> win-settings-min: false;
+    in-out property <bool> win-settings-focused: false;
+
+    in-out property <bool> win-about-open: false;
+    in-out property <bool> win-about-min: false;
+    in-out property <bool> win-about-focused: false;
+
+    // App Data bindings
+    in-out property <string> files-current-path: "/home/harry/Projects/defivek";
+    in-out property <[FileItemData]> files-items;
+    in-out property <int> files-selected-index: -1;
+    in-out property <string> files-status-text: "Ready";
+    in-out property <string> files-error-text: "";
+    in-out property <bool> files-has-error: false;
+
+    in-out property <string> term-output: "";
+    in-out property <string> host-terminal-name: "Terminal";
+
+    in-out property <string> edit-file-path: "";
+    in-out property <string> edit-file-content: "";
+    in-out property <string> edit-status: "Ready";
+    in-out property <bool> edit-is-modified: false;
+
+    // Callbacks to parent
+    in-out property <string> selected-wallpaper: "aurora-borealis";
+    callback wallpaper-selected(string);
+    callback app-action(string);
+    callback files-navigate(string);
+    callback files-navigate-up();
+    callback files-navigate-back();
+    callback files-refresh();
+    callback files-open-item(string, bool);
+
+    callback term-run-command(string);
+    callback term-launch-host();
+    callback term-clear();
+
+    callback edit-new();
+    callback edit-open-preset(string);
+    callback edit-save(string, string);
+
+    callback settings-mode-selected(int);
+    callback settings-toggle-theme();
+    callback settings-toggle-shell-bar();
+    callback settings-reset();
+
+    // Helper functions
+    function focus_files() {
+        root.win-files-focused = true;
+        root.win-term-focused = false;
+        root.win-edit-focused = false;
+        root.win-settings-focused = false;
+        root.win-about-focused = false;
+    }
+    function focus_term() {
+        root.win-files-focused = false;
+        root.win-term-focused = true;
+        root.win-edit-focused = false;
+        root.win-settings-focused = false;
+        root.win-about-focused = false;
+    }
+    function focus_edit() {
+        root.win-files-focused = false;
+        root.win-term-focused = false;
+        root.win-edit-focused = true;
+        root.win-settings-focused = false;
+        root.win-about-focused = false;
+    }
+    function focus_settings() {
+        root.win-files-focused = false;
+        root.win-term-focused = false;
+        root.win-edit-focused = false;
+        root.win-settings-focused = true;
+        root.win-about-focused = false;
+    }
+    function focus_about() {
+        root.win-files-focused = false;
+        root.win-term-focused = false;
+        root.win-edit-focused = false;
+        root.win-settings-focused = false;
+        root.win-about-focused = true;
+    }
+
+    function toggle_files() {
+        if (!root.win-files-open) {
+            root.win-files-open = true;
+            root.win-files-min = false;
+            root.focus_files();
+        } else if (root.win-files-min) {
+            root.win-files-min = false;
+            root.focus_files();
+        } else if (root.win-files-focused) {
+            root.win-files-min = true;
+        } else {
+            root.focus_files();
+        }
+    }
+
+    function toggle_term() {
+        if (!root.win-term-open) {
+            root.win-term-open = true;
+            root.win-term-min = false;
+            root.focus_term();
+        } else if (root.win-term-min) {
+            root.win-term-min = false;
+            root.focus_term();
+        } else if (root.win-term-focused) {
+            root.win-term-min = true;
+        } else {
+            root.focus_term();
+        }
+    }
+
+    function toggle_edit() {
+        if (!root.win-edit-open) {
+            root.win-edit-open = true;
+            root.win-edit-min = false;
+            root.focus_edit();
+        } else if (root.win-edit-min) {
+            root.win-edit-min = false;
+            root.focus_edit();
+        } else if (root.win-edit-focused) {
+            root.win-edit-min = true;
+        } else {
+            root.focus_edit();
+        }
+    }
+
+    function toggle_settings() {
+        if (!root.win-settings-open) {
+            root.win-settings-open = true;
+            root.win-settings-min = false;
+            root.focus_settings();
+        } else if (root.win-settings-min) {
+            root.win-settings-min = false;
+            root.focus_settings();
+        } else if (root.win-settings-focused) {
+            root.win-settings-min = true;
+        } else {
+            root.focus_settings();
+        }
+    }
+
+    function toggle_about() {
+        if (!root.win-about-open) {
+            root.win-about-open = true;
+            root.win-about-min = false;
+            root.focus_about();
+        } else if (root.win-about-min) {
+            root.win-about-min = false;
+            root.focus_about();
+        } else if (root.win-about-focused) {
+            root.win-about-min = true;
+        } else {
+            root.focus_about();
+        }
+    }
+
+    function go_home() {
+        root.win-files-min = true;
+        root.win-term-min = true;
+        root.win-edit-min = true;
+        root.win-settings-min = true;
+        root.win-about-min = true;
+        root.quick-settings-open = false;
+    }
+
+    function go_back() {
+        if (root.quick-settings-open) {
+            root.quick-settings-open = false;
+        } else if (root.win-about-focused && root.win-about-open) {
+            root.win-about-open = false;
+        } else if (root.win-settings-focused && root.win-settings-open) {
+            root.win-settings-open = false;
+        } else if (root.win-edit-focused && root.win-edit-open) {
+            root.win-edit-open = false;
+        } else if (root.win-term-focused && root.win-term-open) {
+            root.win-term-open = false;
+        } else if (root.win-files-focused && root.win-files-open) {
+            root.win-files-open = false;
+        }
+    }
+
+    // Android 10 Transparent Desktop Workspace (Wallpapers rendered by shared engine)
+    background: transparent;
+
+    // ==========================================
+    // 1. Android Top Status Bar
+    // ==========================================
+    Rectangle {
+        y: 0px;
+        width: parent.width;
+        height: 32px;
+        background: ShellPalette.android-bar;
+
+        // Thin separator
+        Rectangle {
+            y: parent.height - 1px;
+            width: parent.width;
+            height: 1px;
+            background: ShellPalette.border-subtle;
+        }
+
+        HorizontalLayout {
+            padding-left: 16px;
+            padding-right: 16px;
+
+            // Left: Clock & Icons
+            HorizontalLayout {
+                spacing: 10px;
+                alignment: center;
+                Text {
+                    text: root.clock-time;
+                    font-size: 12px;
+                    font-weight: 700;
+                    color: ShellPalette.text-primary;
+                    vertical-alignment: center;
+                }
+                Image { width: 14px; height: 14px; source: @image-url("../../assets/icons/bell.svg"); }
+            }
+
+            Rectangle { horizontal-stretch: 1; }
+
+            // Center Quick Settings trigger indicator
+            Rectangle {
+                width: 140px;
+                height: 22px;
+                border-radius: 11px;
+                background: qs-t.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant;
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: 4px;
+                    Text {
+                        text: root.quick-settings-open ? "▲ Close Panel" : "▼ Quick Settings";
+                        font-size: 10px;
+                        font-weight: 700;
+                        color: ShellPalette.accent;
+                        vertical-alignment: center;
+                    }
+                }
+                qs-t := TouchArea {
+                    clicked => { root.quick-settings-open = !root.quick-settings-open; }
+                }
+            }
+
+            Rectangle { horizontal-stretch: 1; }
+
+            // Right: System Status
+            HorizontalLayout {
+                spacing: 10px;
+                alignment: center;
+                Image { width: 14px; height: 14px; source: @image-url("../../assets/icons/wifi.svg"); }
+                Image { width: 15px; height: 15px; source: @image-url("../../assets/icons/battery.svg"); }
+            }
+        }
+    }
+
+    // ==========================================
+    // 2. Quick Settings Dropdown Panel
+    // ==========================================
+    if root.quick-settings-open : Rectangle {
+        x: (parent.width - self.width) / 2;
+        y: 34px;
+        width: min(460px, parent.width - 32px);
+        height: 230px;
+        border-radius: 16px;
+        background: ShellPalette.surface;
+        border-width: 1px;
+        border-color: ShellPalette.border;
+
+        VerticalLayout {
+            padding: 16px;
+            spacing: 12px;
+
+            HorizontalLayout {
+                Text { text: "Quick Settings"; font-size: 13px; font-weight: 700; color: ShellPalette.text-primary; }
+                Rectangle { horizontal-stretch: 1; }
+                Text { text: "✕"; font-size: 12px; color: ShellPalette.text-muted; }
+                TouchArea { clicked => { root.quick-settings-open = false; } }
+            }
+
+            // Quick Setting Tiles
+            GridLayout {
+                spacing: 10px;
+
+                Row {
+                    Rectangle {
+                        width: 130px; height: 44px; border-radius: 10px; background: ShellPalette.accent-surface;
+                        HorizontalLayout { padding-left: 10px; spacing: 8px; alignment: center;
+                            Text { text: "🛜"; font-size: 16px; vertical-alignment: center; }
+                            Text { text: "Wi-Fi: ON"; font-size: 11px; font-weight: 600; color: ShellPalette.accent; vertical-alignment: center; }
+                        }
+                    }
+                    Rectangle {
+                        width: 130px; height: 44px; border-radius: 10px; background: ShellPalette.accent-surface;
+                        HorizontalLayout { padding-left: 10px; spacing: 8px; alignment: center;
+                            Text { text: "Bluetooth"; font-size: 16px; vertical-alignment: center; }
+                            Text { text: "BT: ON"; font-size: 11px; font-weight: 600; color: ShellPalette.accent; vertical-alignment: center; }
+                        }
+                    }
+                    Rectangle {
+                        width: 130px; height: 44px; border-radius: 10px;
+                        background: ShellPalette.dark-mode ? ShellPalette.accent : ShellPalette.surface-variant;
+                        HorizontalLayout { padding-left: 10px; spacing: 8px; alignment: center;
+                            Text { text: "🌓"; font-size: 16px; vertical-alignment: center; }
+                            Text {
+                                text: ShellPalette.dark-mode ? "Dark Mode" : "Light Mode";
+                                font-size: 11px;
+                                font-weight: 600;
+                                color: ShellPalette.dark-mode ? #ffffff : ShellPalette.text-primary;
+                                vertical-alignment: center;
+                            }
+                        }
+                        TouchArea { clicked => { root.settings-toggle-theme(); } }
+                    }
+                }
+            }
+
+            Rectangle { height: 1px; background: ShellPalette.border-subtle; }
+
+            // Sliders
+            VerticalLayout {
+                spacing: 6px;
+                HorizontalLayout {
+                    spacing: 8px; alignment: center;
+                    Text { text: "☀️"; font-size: 12px; vertical-alignment: center; }
+                    Rectangle { horizontal-stretch: 1; height: 6px; border-radius: 3px; background: ShellPalette.accent; }
+                }
+                HorizontalLayout {
+                    spacing: 8px; alignment: center;
+                    Text { text: "🔊"; font-size: 12px; vertical-alignment: center; }
+                    Rectangle { horizontal-stretch: 1; height: 6px; border-radius: 3px; background: ShellPalette.accent; }
+                }
+            }
+        }
+    }
+
+    // ==========================================
+    // 3. Home Screen Canvas & Application Windows
+    // ==========================================
+    workspace := Rectangle {
+        y: 32px;
+        width: parent.width;
+        height: parent.height - 76px;
+
+        // Dismiss quick settings
+        TouchArea {
+            clicked => { root.quick-settings-open = false; }
+        }
+
+        // Home Screen Widgets & App Grid (Centered when windows are minimized)
+        VerticalLayout {
+            width: parent.width;
+            height: parent.height;
+            alignment: center;
+            spacing: 18px;
+
+            // At-a-Glance Widget
+            Rectangle {
+                width: 320px;
+                height: 60px;
+                border-radius: 14px;
+                background: ShellPalette.surface-variant;
+                border-width: 1px;
+                border-color: ShellPalette.border-subtle;
+
+                VerticalLayout {
+                    alignment: center;
+                    spacing: 2px;
+                    Text {
+                        text: root.clock-date;
+                        font-size: 15px;
+                        font-weight: 700;
+                        color: ShellPalette.text-primary;
+                        horizontal-alignment: center;
+                    }
+                    Text {
+                        text: "☀️ 22°C Clear • DeFiveK Desktop Shell";
+                        font-size: 11px;
+                        color: ShellPalette.text-secondary;
+                        horizontal-alignment: center;
+                    }
+                }
+            }
+
+            // Search Bar Widget (Pill Shape with real search input)
+            Rectangle {
+                width: min(480px, parent.width - 40px);
+                height: 42px;
+                border-radius: 21px;
+                background: ShellPalette.android-pill;
+                border-width: 1px;
+                border-color: ShellPalette.border;
+
+                HorizontalLayout {
+                    padding-left: 16px;
+                    padding-right: 16px;
+                    spacing: 10px;
+                    alignment: center;
+
+                    Text { text: "🔍"; font-size: 14px; vertical-alignment: center; }
+                    TextInput {
+                        text <=> root.search-query;
+                        font-size: 12px;
+                        color: ShellPalette.text-primary;
+                        vertical-alignment: center;
+                        horizontal-stretch: 1;
+                    }
+                    Text { text: "🎙️"; font-size: 13px; vertical-alignment: center; }
+                }
+            }
+
+            // Application Grid (Squircle Android Tiles)
+            Rectangle {
+                width: min(520px, parent.width - 40px);
+                height: 110px;
+                background: transparent;
+
+                HorizontalLayout {
+                    spacing: 16px;
+                    alignment: center;
+
+                    // Files Tile
+                    VerticalLayout {
+                        alignment: center;
+                        spacing: 4px;
+                        Rectangle {
+                            width: 58px; height: 58px; border-radius: 16px;
+                            background: f-tile.has-hover ? ShellPalette.surface-hover : ShellPalette.surface;
+                            border-width: 1px; border-color: ShellPalette.border;
+                            Image {
+                                width: 30px; height: 30px;
+                                x: (parent.width - 30px) / 2; y: (parent.height - 30px) / 2;
+                                source: @image-url("../../assets/icons/folder.svg");
+                            }
+                            f-tile := TouchArea { clicked => { root.toggle_files(); } }
+                        }
+                        Text { text: "Files"; font-size: 11px; font-weight: 600; color: ShellPalette.text-primary; horizontal-alignment: center; }
+                    }
+
+                    // Terminal Tile
+                    VerticalLayout {
+                        alignment: center;
+                        spacing: 4px;
+                        Rectangle {
+                            width: 58px; height: 58px; border-radius: 16px;
+                            background: t-tile.has-hover ? ShellPalette.surface-hover : ShellPalette.surface;
+                            border-width: 1px; border-color: ShellPalette.border;
+                            Image {
+                                width: 30px; height: 30px;
+                                x: (parent.width - 30px) / 2; y: (parent.height - 30px) / 2;
+                                source: @image-url("../../assets/icons/terminal.svg");
+                            }
+                            t-tile := TouchArea { clicked => { root.toggle_term(); } }
+                        }
+                        Text { text: "Terminal"; font-size: 11px; font-weight: 600; color: ShellPalette.text-primary; horizontal-alignment: center; }
+                    }
+
+                    // Notes / Editor Tile
+                    VerticalLayout {
+                        alignment: center;
+                        spacing: 4px;
+                        Rectangle {
+                            width: 58px; height: 58px; border-radius: 16px;
+                            background: e-tile.has-hover ? ShellPalette.surface-hover : ShellPalette.surface;
+                            border-width: 1px; border-color: ShellPalette.border;
+                            Image {
+                                width: 30px; height: 30px;
+                                x: (parent.width - 30px) / 2; y: (parent.height - 30px) / 2;
+                                source: @image-url("../../assets/icons/editor.svg");
+                            }
+                            e-tile := TouchArea { clicked => { root.toggle_edit(); } }
+                        }
+                        Text { text: "Editor"; font-size: 11px; font-weight: 600; color: ShellPalette.text-primary; horizontal-alignment: center; }
+                    }
+
+                    // Settings Tile
+                    VerticalLayout {
+                        alignment: center;
+                        spacing: 4px;
+                        Rectangle {
+                            width: 58px; height: 58px; border-radius: 16px;
+                            background: s-tile.has-hover ? ShellPalette.surface-hover : ShellPalette.surface;
+                            border-width: 1px; border-color: ShellPalette.border;
+                            Image {
+                                width: 30px; height: 30px;
+                                x: (parent.width - 30px) / 2; y: (parent.height - 30px) / 2;
+                                source: @image-url("../../assets/icons/settings.svg");
+                            }
+                            s-tile := TouchArea { clicked => { root.toggle_settings(); } }
+                        }
+                        Text { text: "Settings"; font-size: 11px; font-weight: 600; color: ShellPalette.text-primary; horizontal-alignment: center; }
+                    }
+
+                    // About Tile
+                    VerticalLayout {
+                        alignment: center;
+                        spacing: 4px;
+                        Rectangle {
+                            width: 58px; height: 58px; border-radius: 16px;
+                            background: a-tile.has-hover ? ShellPalette.surface-hover : ShellPalette.surface;
+                            border-width: 1px; border-color: ShellPalette.border;
+                            Image {
+                                width: 30px; height: 30px;
+                                x: (parent.width - 30px) / 2; y: (parent.height - 30px) / 2;
+                                source: @image-url("../../assets/icons/info.svg");
+                            }
+                            a-tile := TouchArea { clicked => { root.toggle_about(); } }
+                        }
+                        Text { text: "About"; font-size: 11px; font-weight: 600; color: ShellPalette.text-primary; horizontal-alignment: center; }
+                    }
+                }
+            }
+        }
+
+        // --- Android Floating Window Frames ---
+        // Window 1: Files
+        WindowFrame {
+            title: "Files — " + root.files-current-path;
+            icon: "📁";
+            win-x: 40px;
+            win-y: 20px;
+            win-width: min(680px, workspace.width - 60px);
+            win-height: min(420px, workspace.height - 40px);
+            max-bounds-width: workspace.width;
+            max-bounds-height: workspace.height;
+            is-open: root.win-files-open;
+            is-minimized: root.win-files-min;
+            is-focused: root.win-files-focused;
+            mode-style: 2;
+
+            focused => { root.focus_files(); }
+            close-clicked => { root.win-files-open = false; }
+            minimize-clicked => { root.win-files-min = true; }
+
+            AppFiles {
+                current-path: root.files-current-path;
+                items: root.files-items;
+                selected-index: root.files-selected-index;
+                status-text: root.files-status-text;
+                error-text: root.files-error-text;
+                has-error: root.files-has-error;
+
+                navigate-to(p) => { root.files-navigate(p); }
+                navigate-up => { root.files-navigate-up(); }
+                navigate-back => { root.files-navigate-back(); }
+                refresh-folder => { root.files-refresh(); }
+                open-item(p, is_dir) => { root.files-open-item(p, is_dir); }
+            }
+        }
+
+        // Window 2: Terminal
+        WindowFrame {
+            title: "Terminal — host shell";
+            icon: "💻";
+            win-x: 80px;
+            win-y: 40px;
+            win-width: min(620px, workspace.width - 100px);
+            win-height: min(380px, workspace.height - 60px);
+            max-bounds-width: workspace.width;
+            max-bounds-height: workspace.height;
+            is-open: root.win-term-open;
+            is-minimized: root.win-term-min;
+            is-focused: root.win-term-focused;
+            mode-style: 2;
+
+            focused => { root.focus_term(); }
+            close-clicked => { root.win-term-open = false; }
+            minimize-clicked => { root.win-term-min = true; }
+
+            AppTerminal {
+                terminal-output: root.term-output;
+                host-terminal-name: root.host-terminal-name;
+                run-command(cmd) => { root.term-run-command(cmd); }
+                launch-host-terminal => { root.term-launch-host(); }
+                clear-output => { root.term-clear(); }
+            }
+        }
+
+        // Window 3: Editor
+        WindowFrame {
+            title: "Editor — " + root.edit-file-path;
+            icon: "📝";
+            win-x: 120px;
+            win-y: 60px;
+            win-width: min(600px, workspace.width - 140px);
+            win-height: min(400px, workspace.height - 80px);
+            max-bounds-width: workspace.width;
+            max-bounds-height: workspace.height;
+            is-open: root.win-edit-open;
+            is-minimized: root.win-edit-min;
+            is-focused: root.win-edit-focused;
+            mode-style: 2;
+
+            focused => { root.focus_edit(); }
+            close-clicked => { root.win-edit-open = false; }
+            minimize-clicked => { root.win-edit-min = true; }
+
+            AppEditor {
+                file-path: root.edit-file-path;
+                file-content: root.edit-file-content;
+                status-message: root.edit-status;
+                is-modified: root.edit-is-modified;
+
+                new-file => { root.edit-new(); }
+                open-preset(p) => { root.edit-open-preset(p); }
+                save-file(p, c) => { root.edit-save(p, c); }
+            }
+        }
+
+        // Window 4: Settings
+        WindowFrame {
+            title: "Settings";
+            icon: "⚙️";
+            win-x: 140px;
+            win-y: 50px;
+            win-width: min(600px, workspace.width - 160px);
+            win-height: min(440px, workspace.height - 70px);
+            max-bounds-width: workspace.width;
+            max-bounds-height: workspace.height;
+            is-open: root.win-settings-open;
+            is-minimized: root.win-settings-min;
+            is-focused: root.win-settings-focused;
+            mode-style: 2;
+
+            focused => { root.focus_settings(); }
+            close-clicked => { root.win-settings-open = false; }
+            minimize-clicked => { root.win-settings-min = true; }
+
+            AppSettings {
+                current-mode: 2;
+                dark-mode: ShellPalette.dark-mode;
+                selected-wallpaper: root.selected-wallpaper;
+                wallpaper-selected(w) => { root.wallpaper-selected(w); }
+                mode-selected(m) => { root.settings-mode-selected(m); }
+                toggle-theme => { root.settings-toggle-theme(); }
+                toggle-shell-bar => { root.settings-toggle-shell-bar(); }
+                reset-defaults => { root.settings-reset(); }
+            }
+        }
+
+        // Window 5: About
+        WindowFrame {
+            title: "About DeFiveK";
+            icon: "✦";
+            win-x: 160px;
+            win-y: 70px;
+            win-width: min(520px, workspace.width - 180px);
+            win-height: min(380px, workspace.height - 90px);
+            max-bounds-width: workspace.width;
+            max-bounds-height: workspace.height;
+            is-open: root.win-about-open;
+            is-minimized: root.win-about-min;
+            is-focused: root.win-about-focused;
+            mode-style: 2;
+
+            focused => { root.focus_about(); }
+            close-clicked => { root.win-about-open = false; }
+            minimize-clicked => { root.win-about-min = true; }
+
+            AppAbout {
+                current-mode: 2;
+            }
+        }
+    }
+
+    // ==========================================
+    // 4. Android Bottom 3-Button Navigation Bar
+    // ==========================================
+    Rectangle {
+        y: parent.height - 44px;
+        width: parent.width;
+        height: 44px;
+        background: ShellPalette.android-bar;
+
+        // Thin separator
+        Rectangle {
+            y: 0px;
+            width: parent.width;
+            height: 1px;
+            background: ShellPalette.border;
+        }
+
+        HorizontalLayout {
+            padding-left: 40px;
+            padding-right: 40px;
+            alignment: center;
+            spacing: 50px;
+
+            // Back button ◀
+            Rectangle {
+                width: 60px;
+                height: 32px;
+                border-radius: 8px;
+                background: b-touch.has-hover ? ShellPalette.surface-hover : transparent;
+                Text { text: "◀"; font-size: 14px; color: ShellPalette.text-primary; horizontal-alignment: center; vertical-alignment: center; }
+                b-touch := TouchArea { clicked => { root.go_back(); } }
+            }
+
+            // Home button ●
+            Rectangle {
+                width: 60px;
+                height: 32px;
+                border-radius: 8px;
+                background: h-touch.has-hover ? ShellPalette.surface-hover : transparent;
+                Text { text: "●"; font-size: 16px; color: ShellPalette.text-primary; horizontal-alignment: center; vertical-alignment: center; }
+                h-touch := TouchArea { clicked => { root.go_home(); } }
+            }
+
+            // Recents button ■
+            Rectangle {
+                width: 60px;
+                height: 32px;
+                border-radius: 8px;
+                background: r-touch.has-hover ? ShellPalette.surface-hover : transparent;
+                Text { text: "■"; font-size: 14px; color: ShellPalette.text-primary; horizontal-alignment: center; vertical-alignment: center; }
+                r-touch := TouchArea {
+                    clicked => {
+                        root.win-files-min = false;
+                        root.win-term-min = false;
+                        root.focus_files();
+                    }
+                }
+            }
+        }
+    }
+}

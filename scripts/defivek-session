@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# DeFiveK Desktop — Standalone X11 Session Launcher
+# Runs as an XSession leader for LightDM or xinit/startx
+# ==============================================================================
+
+set -eo pipefail
+
+export XDG_CURRENT_DESKTOP="DeFiveK"
+export DESKTOP_SESSION="defivek"
+
+# Source user profile if available
+[ -f "$HOME/.profile" ] && source "$HOME/.profile"
+
+# If an X11 composite manager or lightweight helper is available, start it
+if command -v picom >/dev/null 2>&1; then
+    picom -b &
+fi
+
+# If a background window manager helper (like openbox or xfwm4) is installed,
+# run it in background to assist external X11 client windows launched by Terminal
+if command -v openbox >/dev/null 2>&1; then
+    openbox &
+fi
+
+# Launch DeFiveK Desktop in full desktop shell mode
+# When defivek exits, the session ends cleanly
+exec defivek --fullscreen "$@"

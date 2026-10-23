@@ -1,0 +1,227 @@
+import { ShellPalette } from "theme.slint";
+
+export component AppTerminal inherits Rectangle {
+    in-out property <string> terminal-output: "DeFiveK Terminal v0.2.0 (Debian 13 ARM64 / Host Shell)\nType a command below or click a quick action.\n";
+    in-out property <string> command-input: "";
+    in-out property <string> host-terminal-name: "Host Terminal Detected";
+    in-out property <string> status-info: "Interactive Terminal Ready";
+
+    callback run-command(string);
+    callback launch-host-terminal();
+    callback clear-output();
+
+    background: #0b0f17;
+
+    VerticalLayout {
+        spacing: 0px;
+
+        // ==========================================
+        // 1. Terminal Header / Controls
+        // ==========================================
+        Rectangle {
+            height: 38px;
+            background: #141a26;
+
+            // Thin bottom separator
+            Rectangle {
+                y: parent.height - 1px;
+                width: parent.width;
+                height: 1px;
+                background: #252e42;
+            }
+
+            HorizontalLayout {
+                padding-left: 10px;
+                padding-right: 10px;
+                spacing: 8px;
+
+                // Host Terminal Launch Button
+                Rectangle {
+                    height: 26px;
+                    border-radius: 4px;
+                    background: host-btn.has-hover ? ShellPalette.accent-hover : ShellPalette.accent;
+                    HorizontalLayout {
+                        padding-left: 8px;
+                        padding-right: 8px;
+                        alignment: center;
+                        spacing: 5px;
+                        Image { width: 13px; height: 13px; source: @image-url("../../assets/icons/terminal.svg"); }
+                        Text {
+                            text: root.host-terminal-name;
+                            font-size: 11px;
+                            font-weight: 700;
+                            color: #ffffff;
+                            vertical-alignment: center;
+                        }
+                    }
+                    host-btn := TouchArea {
+                        clicked => { root.launch-host-terminal(); }
+                    }
+                }
+
+                // Clear Output Button
+                Rectangle {
+                    width: 60px;
+                    height: 26px;
+                    border-radius: 4px;
+                    background: clr-btn.has-hover ? #2e384e : #1c2436;
+                    border-width: 1px;
+                    border-color: #2b374e;
+
+                    HorizontalLayout {
+                        alignment: center;
+                        Text { text: "Clear"; font-size: 11px; color: #cbd5e1; vertical-alignment: center; }
+                    }
+                    clr-btn := TouchArea {
+                        clicked => { root.clear-output(); }
+                    }
+                }
+
+                Rectangle { horizontal-stretch: 1; }
+
+                // Quick Command Action Chips
+                HorizontalLayout {
+                    spacing: 4px;
+                    alignment: center;
+
+                    Rectangle {
+                        height: 22px; border-radius: 3px; background: q1.has-hover ? #2e384e : #1c2436;
+                        HorizontalLayout { padding-left: 6px; padding-right: 6px; alignment: center;
+                            Text { text: "ls -la"; font-size: 10px; font-family: "monospace"; color: #38bdf8; vertical-alignment: center; }
+                        }
+                        q1 := TouchArea { clicked => { root.run-command("ls -la"); } }
+                    }
+
+                    Rectangle {
+                        height: 22px; border-radius: 3px; background: q2.has-hover ? #2e384e : #1c2436;
+                        HorizontalLayout { padding-left: 6px; padding-right: 6px; alignment: center;
+                            Text { text: "uname -a"; font-size: 10px; font-family: "monospace"; color: #38bdf8; vertical-alignment: center; }
+                        }
+                        q2 := TouchArea { clicked => { root.run-command("uname -a"); } }
+                    }
+
+                    Rectangle {
+                        height: 22px; border-radius: 3px; background: q3.has-hover ? #2e384e : #1c2436;
+                        HorizontalLayout { padding-left: 6px; padding-right: 6px; alignment: center;
+                            Text { text: "whoami"; font-size: 10px; font-family: "monospace"; color: #38bdf8; vertical-alignment: center; }
+                        }
+                        q3 := TouchArea { clicked => { root.run-command("whoami"); } }
+                    }
+
+                    Rectangle {
+                        height: 22px; border-radius: 3px; background: q4.has-hover ? #2e384e : #1c2436;
+                        HorizontalLayout { padding-left: 6px; padding-right: 6px; alignment: center;
+                            Text { text: "help"; font-size: 10px; font-family: "monospace"; color: #38bdf8; vertical-alignment: center; }
+                        }
+                        q4 := TouchArea { clicked => { root.run-command("help"); } }
+                    }
+                }
+            }
+        }
+
+        // ==========================================
+        // 2. Terminal Output Screen
+        // ==========================================
+        Rectangle {
+            vertical-stretch: 1;
+            background: #090d14;
+
+            Flickable {
+                content-height: term-text.preferred-height + 30px;
+
+                term-text := Text {
+                    x: 12px;
+                    y: 10px;
+                    width: parent.width - 24px;
+                    text: root.terminal-output;
+                    font-size: 11px;
+                    font-family: "monospace";
+                    color: #4ade80;
+                    wrap: word-wrap;
+                }
+            }
+        }
+
+        // ==========================================
+        // 3. Command Prompt Input Bar
+        // ==========================================
+        Rectangle {
+            height: 38px;
+            background: #141a26;
+
+            // Thin top separator
+            Rectangle {
+                y: 0px;
+                width: parent.width;
+                height: 1px;
+                background: #252e42;
+            }
+
+            HorizontalLayout {
+                padding-left: 10px;
+                padding-right: 10px;
+                spacing: 8px;
+
+                // Prompt prefix
+                Text {
+                    text: "harry@defivek:~$";
+                    font-size: 11px;
+                    font-weight: 700;
+                    font-family: "monospace";
+                    color: #38bdf8;
+                    vertical-alignment: center;
+                }
+
+                // Input Field
+                Rectangle {
+                    horizontal-stretch: 1;
+                    height: 26px;
+                    border-radius: 4px;
+                    background: #090d14;
+                    border-width: 1px;
+                    border-color: #2b374e;
+
+                    HorizontalLayout {
+                        padding-left: 8px;
+                        padding-right: 8px;
+
+                        cmd-input := TextInput {
+                            text <=> root.command-input;
+                            font-size: 11px;
+                            font-family: "monospace";
+                            color: #f1f5f9;
+                            vertical-alignment: center;
+                            accepted => {
+                                if (root.command-input != "") {
+                                    root.run-command(root.command-input);
+                                    root.command-input = "";
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Execute / Send Button
+                Rectangle {
+                    width: 50px;
+                    height: 26px;
+                    border-radius: 4px;
+                    background: send-t.has-hover ? ShellPalette.accent-hover : ShellPalette.accent;
+
+                    HorizontalLayout {
+                        alignment: center;
+                        Text { text: "Run"; font-size: 11px; font-weight: 700; color: #ffffff; vertical-alignment: center; }
+                    }
+                    send-t := TouchArea {
+                        clicked => {
+                            if (root.command-input != "") {
+                                root.run-command(root.command-input);
+                                root.command-input = "";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

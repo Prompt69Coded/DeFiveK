@@ -1,0 +1,11 @@
+[Desktop Entry]
+# DeFiveK Desktop — Optional LightDM / X11 Session File
+# NOTE: Provided for documentation / Phase 6 reference only.
+# Do NOT install automatically in Phase 1.
+Name=DeFiveK Desktop
+Comment=Modular Linux Desktop Shell (Windows, macOS, Android, Aurora)
+Exec=defivek
+TryExec=defivek
+Icon=defivek-logo
+Type=Application
+DesktopNames=DeFiveK

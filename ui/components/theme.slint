@@ -1,0 +1,126 @@
+// DeFiveK Desktop — Premium Design System Tokens (Phase 3)
+// Centralized tokens for colors, typography, surfaces, borders, radii, and mode identities.
+
+export global ShellPalette {
+    in-out property <bool> dark-mode: true;
+
+    // ==========================================
+    // 1. Neutral Surfaces & Backgrounds
+    // ==========================================
+    out property <color> background: dark-mode ? #0c0f17 : #f4f6fb;
+    out property <color> surface: dark-mode ? #151922 : #ffffff;
+    out property <color> surface-variant: dark-mode ? #1c2230 : #f0f3f9;
+    out property <color> surface-elevated: dark-mode ? #22293a : #ffffff;
+    out property <color> surface-hover: dark-mode ? #293247 : #e4ebf5;
+    out property <color> surface-active: dark-mode ? #333e59 : #d8e2f0;
+    out property <color> surface-overlay: dark-mode ? rgba(12, 15, 23, 0.75) : rgba(255, 255, 255, 0.82);
+
+    // ==========================================
+    // 2. Borders, Separators & Focus Rings
+    // ==========================================
+    out property <color> border: dark-mode ? #283145 : #cbd5e1;
+    out property <color> border-subtle: dark-mode ? #1e2536 : #e2e8f0;
+    out property <color> border-strong: dark-mode ? #3b4763 : #94a3b8;
+    out property <color> border-focus: dark-mode ? #38bdf8 : #2563eb;
+    out property <color> border-glass: dark-mode ? rgba(255, 255, 255, 0.12) : rgba(255, 255, 255, 0.65);
+
+    // ==========================================
+    // 3. Typography & Text Hierarchy
+    // ==========================================
+    out property <color> text-primary: dark-mode ? #f8fafc : #0f172a;
+    out property <color> text-secondary: dark-mode ? #94a3b8 : #475569;
+    out property <color> text-muted: dark-mode ? #64748b : #94a3b8;
+    out property <color> text-inverse: dark-mode ? #0f172a : #ffffff;
+    out property <color> text-on-accent: #ffffff;
+
+    // ==========================================
+    // 4. Brand & Semantic Accents
+    // ==========================================
+    out property <color> accent: dark-mode ? #38bdf8 : #0284c7;
+    out property <color> accent-hover: dark-mode ? #60a5fa : #0369a1;
+    out property <color> accent-active: dark-mode ? #0284c7 : #075985;
+    out property <color> accent-surface: dark-mode ? rgba(56, 189, 248, 0.14) : rgba(2, 132, 199, 0.10);
+    out property <color> accent-glow: dark-mode ? rgba(56, 189, 248, 0.35) : rgba(2, 132, 199, 0.25);
+
+    out property <color> success: #10b981;
+    out property <color> success-surface: dark-mode ? rgba(16, 185, 129, 0.15) : rgba(16, 185, 129, 0.10);
+    out property <color> warning: #f59e0b;
+    out property <color> warning-surface: dark-mode ? rgba(245, 158, 11, 0.15) : rgba(245, 158, 11, 0.10);
+    out property <color> danger: #ef4444;
+    out property <color> danger-hover: #dc2626;
+    out property <color> danger-surface: dark-mode ? rgba(239, 68, 68, 0.15) : rgba(239, 68, 68, 0.10);
+    out property <color> info: #6366f1;
+
+    // ==========================================
+    // 5. Window Chrome & Surfaces
+    // ==========================================
+    out property <color> window-bg: dark-mode ? #131722 : #ffffff;
+    out property <color> window-titlebar: dark-mode ? #191f2c : #f8fafc;
+    out property <color> window-titlebar-inactive: dark-mode ? #11151f : #edf2f7;
+    out property <color> window-border: dark-mode ? #293348 : #cbd5e1;
+    out property <color> window-border-focused: dark-mode ? #38bdf8 : #0284c7;
+    out property <color> window-shadow: dark-mode ? rgba(0, 0, 0, 0.55) : rgba(15, 23, 42, 0.15);
+
+    // ==========================================
+    // 6. Mode-Specific Visual Signatures
+    // ==========================================
+    // Windows 7 Aero
+    out property <color> win7-aero-blue: dark-mode ? #2563eb : #1d4ed8;
+    out property <color> win7-taskbar: dark-mode ? rgba(13, 19, 31, 0.90) : rgba(235, 242, 250, 0.94);
+    out property <color> win7-taskbar-item: dark-mode ? rgba(30, 42, 66, 0.60) : rgba(255, 255, 255, 0.65);
+    out property <color> win7-taskbar-item-active: dark-mode ? rgba(40, 60, 95, 0.85) : rgba(210, 227, 248, 0.90);
+    out property <color> win7-start-glow: rgba(56, 189, 248, 0.40);
+    out property <color> win7-start-menu-bg: dark-mode ? #141b2a : #f5f8fc;
+    out property <color> win7-start-menu-sidebar: dark-mode ? #0f1420 : #e8eff7;
+
+    // macOS Yosemite / Sonoma
+    out property <color> macos-menubar: dark-mode ? rgba(20, 24, 34, 0.88) : rgba(255, 255, 255, 0.88);
+    out property <color> macos-dock: dark-mode ? rgba(24, 30, 44, 0.80) : rgba(248, 250, 255, 0.84);
+    out property <color> macos-dock-border: dark-mode ? rgba(255, 255, 255, 0.15) : rgba(0, 0, 0, 0.10);
+    out property <color> macos-traffic-close: #ff5f56;
+    out property <color> macos-traffic-min: #ffbd2e;
+    out property <color> macos-traffic-zoom: #27c93f;
+
+    // Android 10 Material
+    out property <color> android-bar: dark-mode ? #10131b : #ebedf2;
+    out property <color> android-pill: dark-mode ? #1e2433 : #ffffff;
+    out property <color> android-nav: dark-mode ? #10131b : #ebedf2;
+    out property <color> android-tile-active: dark-mode ? #38bdf8 : #0284c7;
+
+    // Aurora Cyber-Tiling
+    out property <color> aurora-panel: dark-mode ? #0c0f17 : #e9eef6;
+    out property <color> aurora-cyan: #06b6d4;
+    out property <color> aurora-purple: #8b5cf6;
+    out property <color> aurora-emerald: #10b981;
+    out property <color> aurora-pill-active: dark-mode ? #06b6d4 : #0891b2;
+    out property <color> aurora-pill-inactive: dark-mode ? #182030 : #dce4ef;
+
+    // ==========================================
+    // 7. Component Metric & Layout Tokens
+    // ==========================================
+    out property <length> radius-xs: 3px;
+    out property <length> radius-sm: 6px;
+    out property <length> radius-md: 10px;
+    out property <length> radius-lg: 14px;
+    out property <length> radius-pill: 999px;
+
+    out property <length> spacing-xs: 4px;
+    out property <length> spacing-sm: 8px;
+    out property <length> spacing-md: 12px;
+    out property <length> spacing-lg: 16px;
+    out property <length> spacing-xl: 24px;
+    out property <length> spacing-xxl: 32px;
+
+    out property <length> icon-xs: 12px;
+    out property <length> icon-sm: 14px;
+    out property <length> icon-md: 16px;
+    out property <length> icon-lg: 24px;
+    out property <length> icon-xl: 32px;
+
+    out property <length> control-height-sm: 24px;
+    out property <length> control-height-md: 28px;
+    out property <length> control-height-lg: 32px;
+    out property <length> toolbar-height: 40px;
+    out property <length> titlebar-height: 36px;
+    out property <length> statusbar-height: 24px;
+}

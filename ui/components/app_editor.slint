@@ -1,0 +1,225 @@
+import { ShellPalette } from "theme.slint";
+
+export component AppEditor inherits Rectangle {
+    in-out property <string> file-path: "/home/harry/Projects/defivek/README.md";
+    in-out property <string> file-content: "# DeFiveK Desktop\nModular Linux Desktop Shell for Debian 13 ARM64\n\nPhase 2 Functional Prototype active.";
+    in-out property <string> status-message: "File loaded ready for editing";
+    in-out property <bool> is-modified: false;
+
+    callback new-file();
+    callback open-preset(string);
+    callback save-file(string, string); // path, content
+
+    background: ShellPalette.window-bg;
+
+    VerticalLayout {
+        spacing: 0px;
+
+        // ==========================================
+        // 1. Editor Toolbar
+        // ==========================================
+        Rectangle {
+            height: 38px;
+            background: ShellPalette.surface;
+
+            // Thin bottom separator
+            Rectangle {
+                y: parent.height - 1px;
+                width: parent.width;
+                height: 1px;
+                background: ShellPalette.border-subtle;
+            }
+
+            HorizontalLayout {
+                padding-left: 10px;
+                padding-right: 10px;
+                spacing: 8px;
+
+                // New File Button
+                Rectangle {
+                    width: 58px;
+                    height: 26px;
+                    border-radius: 4px;
+                    background: btn-new.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant;
+                    border-width: 1px;
+                    border-color: ShellPalette.border;
+
+                    HorizontalLayout {
+                        alignment: center;
+                        spacing: 4px;
+                        Image { width: 13px; height: 13px; source: @image-url("../../assets/icons/editor.svg"); }
+                        Text { text: "New"; font-size: 11px; font-weight: 600; color: ShellPalette.text-primary; vertical-alignment: center; }
+                    }
+                    btn-new := TouchArea {
+                        clicked => {
+                            root.new-file();
+                        }
+                    }
+                }
+
+                // Save File Button
+                Rectangle {
+                    width: 68px;
+                    height: 26px;
+                    border-radius: 4px;
+                    background: btn-save.has-hover ? ShellPalette.accent-hover : ShellPalette.accent;
+
+                    HorizontalLayout {
+                        alignment: center;
+                        spacing: 4px;
+                        Image { width: 13px; height: 13px; source: @image-url("../../assets/icons/save.svg"); }
+                        Text { text: "Save"; font-size: 11px; font-weight: 700; color: #ffffff; vertical-alignment: center; }
+                    }
+                    btn-save := TouchArea {
+                        clicked => {
+                            root.save-file(root.file-path, root.file-content);
+                        }
+                    }
+                }
+
+                Rectangle { width: 1px; height: 18px; background: ShellPalette.border; }
+
+                // Quick Open Preset: README.md
+                Rectangle {
+                    height: 26px;
+                    border-radius: 4px;
+                    background: btn-pre1.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant;
+                    border-width: 1px;
+                    border-color: ShellPalette.border;
+
+                    HorizontalLayout {
+                        padding-left: 8px;
+                        padding-right: 8px;
+                        alignment: center;
+                        spacing: 4px;
+                        Text { text: "README.md"; font-size: 10px; font-family: "monospace"; color: ShellPalette.text-primary; vertical-alignment: center; }
+                    }
+                    btn-pre1 := TouchArea {
+                        clicked => { root.open-preset("README.md"); }
+                    }
+                }
+
+                // Quick Open Preset: Cargo.toml
+                Rectangle {
+                    height: 26px;
+                    border-radius: 4px;
+                    background: btn-pre2.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant;
+                    border-width: 1px;
+                    border-color: ShellPalette.border;
+
+                    HorizontalLayout {
+                        padding-left: 8px;
+                        padding-right: 8px;
+                        alignment: center;
+                        spacing: 4px;
+                        Text { text: "Cargo.toml"; font-size: 10px; font-family: "monospace"; color: ShellPalette.text-primary; vertical-alignment: center; }
+                    }
+                    btn-pre2 := TouchArea {
+                        clicked => { root.open-preset("Cargo.toml"); }
+                    }
+                }
+
+                Rectangle { horizontal-stretch: 1; }
+
+                // Active File Path Badge
+                Rectangle {
+                    height: 24px;
+                    border-radius: 4px;
+                    background: ShellPalette.surface-variant;
+
+                    HorizontalLayout {
+                        padding-left: 8px;
+                        padding-right: 8px;
+                        alignment: center;
+                        spacing: 4px;
+                        Text { text: root.is-modified ? "•" : ""; font-size: 14px; font-weight: 800; color: ShellPalette.warning; vertical-alignment: center; }
+                        Text {
+                            text: root.file-path;
+                            font-size: 10px;
+                            font-family: "monospace";
+                            color: ShellPalette.text-secondary;
+                            vertical-alignment: center;
+                        }
+                    }
+                }
+            }
+        }
+
+        // ==========================================
+        // 2. Multiline Text Editing Area
+        // ==========================================
+        Rectangle {
+            vertical-stretch: 1;
+            background: ShellPalette.surface;
+
+            Flickable {
+                content-height: max(self.height, editor-input.preferred-height + 40px);
+
+                editor-input := TextInput {
+                    x: 14px;
+                    y: 12px;
+                    width: parent.width - 28px;
+                    text <=> root.file-content;
+                    font-size: 12px;
+                    font-family: "monospace";
+                    color: ShellPalette.text-primary;
+                    wrap: word-wrap;
+                    single-line: false;
+                    edited => {
+                        root.is-modified = true;
+                        root.status-message = "File modified (unsaved changes)";
+                    }
+                }
+            }
+        }
+
+        // ==========================================
+        // 3. Editor Bottom Status Bar
+        // ==========================================
+        Rectangle {
+            height: 24px;
+            background: ShellPalette.surface-variant;
+
+            // Thin top separator
+            Rectangle {
+                y: 0px;
+                width: parent.width;
+                height: 1px;
+                background: ShellPalette.border-subtle;
+            }
+
+            HorizontalLayout {
+                padding-left: 12px;
+                padding-right: 12px;
+
+                Text {
+                    text: root.status-message;
+                    font-size: 10px;
+                    color: root.is-modified ? ShellPalette.warning : ShellPalette.text-secondary;
+                    vertical-alignment: center;
+                }
+
+                Rectangle { horizontal-stretch: 1; }
+
+                HorizontalLayout {
+                    spacing: 12px;
+                    alignment: center;
+
+                    Text {
+                        text: "UTF-8";
+                        font-size: 10px;
+                        font-weight: 600;
+                        color: ShellPalette.text-muted;
+                        vertical-alignment: center;
+                    }
+                    Text {
+                        text: "Rust / Text Mode";
+                        font-size: 10px;
+                        color: ShellPalette.accent;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,255 @@
+import { ShellPalette } from "components/theme.slint";
+import { WallpaperView } from "components/wallpaper_view.slint";
+import { WindowsMode } from "components/windows_mode.slint";
+import { MacosMode } from "components/macos_mode.slint";
+import { AndroidMode } from "components/android_mode.slint";
+import { AuroraMode } from "components/aurora_mode.slint";
+import { FileItemData } from "components/app_files.slint";
+
+export { ShellPalette, FileItemData }
+
+export component MainWindow inherits Window {
+    title: "DeFiveK Desktop — Precision Layout & Pixel-Perfect Alignment (Phase 4)";
+    default-font-family: "sans-serif";
+    min-width: 900px;
+    min-height: 580px;
+    preferred-width: 1200px;
+    preferred-height: 760px;
+    background: ShellPalette.background;
+
+    // Properties bound with Rust runtime
+    in-out property <int> current-mode: 0; // 0=Windows, 1=macOS, 2=Android, 3=Aurora
+    in-out property <bool> dark-mode: true;
+    in-out property <bool> show-shell-controls: true;
+    in-out property <string> selected-wallpaper: "aurora-borealis";
+    in-out property <string> clock-time: "12:00 PM";
+    in-out property <string> clock-date: "Friday, Oct 23";
+    in-out property <string> status-banner: "DeFiveK Desktop Shell Ready";
+    in-out property <string> status-detail: "Debian 13 ARM64 (Trixie) / X11 / VirGL";
+
+    // Application data properties shared across modes
+    in-out property <string> files-current-path: "/home/harry/Projects/defivek";
+    in-out property <[FileItemData]> files-items;
+    in-out property <int> files-selected-index: -1;
+    in-out property <string> files-status-text: "Ready";
+    in-out property <string> files-error-text: "";
+    in-out property <bool> files-has-error: false;
+
+    in-out property <string> term-output: "DeFiveK Terminal v0.2.0 (Debian 13 ARM64)\nType a command below or click a quick action.\n";
+    in-out property <string> host-terminal-name: "Host Terminal";
+
+    in-out property <string> edit-file-path: "/home/harry/Projects/defivek/README.md";
+    in-out property <string> edit-file-content: "# DeFiveK Desktop\nModular Linux Desktop Shell for Debian 13 ARM64\n\nPhase 2 Functional Prototype active.";
+    in-out property <string> edit-status: "Ready";
+    in-out property <bool> edit-is-modified: false;
+
+    // Callbacks to Rust event handlers
+    callback mode-changed(int);
+    callback toggle-theme();
+    callback toggle-shell-controls();
+    callback app-action(string);
+
+    callback files-navigate(string);
+    callback files-navigate-up();
+    callback files-navigate-back();
+    callback files-refresh();
+    callback files-open-item(string, bool);
+
+    callback term-run-command(string);
+    callback term-launch-host();
+    callback term-clear();
+
+    callback edit-new();
+    callback edit-open-preset(string);
+    callback edit-save(string, string);
+
+    callback settings-reset();
+    callback wallpaper-selected(string);
+
+    // ==========================================
+    // Layer 0: Wallpaper Engine (Fills 100% of desktop behind all content)
+    // ==========================================
+    WallpaperView {
+        wallpaper-id: root.selected-wallpaper;
+        dark-mode: root.dark-mode;
+    }
+
+    // Active Desktop Mode Container (Fills 100% of the screen/window)
+    Rectangle {
+        width: 100%;
+        height: 100%;
+        clip: true;
+
+        // --- Mode 0: Windows 7 ---
+            if root.current-mode == 0 : WindowsMode {
+                selected-wallpaper: root.selected-wallpaper;
+                wallpaper-selected(w) => { root.selected-wallpaper = w; root.wallpaper-selected(w); }
+                clock-time: root.clock-time;
+                clock-date: root.clock-date;
+
+                files-current-path: root.files-current-path;
+                files-items: root.files-items;
+                files-selected-index: root.files-selected-index;
+                files-status-text: root.files-status-text;
+                files-error-text: root.files-error-text;
+                files-has-error: root.files-has-error;
+
+                term-output: root.term-output;
+                host-terminal-name: root.host-terminal-name;
+
+                edit-file-path: root.edit-file-path;
+                edit-file-content: root.edit-file-content;
+                edit-status: root.edit-status;
+                edit-is-modified: root.edit-is-modified;
+
+                app-action(act) => { root.app-action(act); }
+                files-navigate(p) => { root.files-navigate(p); }
+                files-navigate-up => { root.files-navigate-up(); }
+                files-navigate-back => { root.files-navigate-back(); }
+                files-refresh => { root.files-refresh(); }
+                files-open-item(p, is_dir) => { root.files-open-item(p, is_dir); }
+
+                term-run-command(c) => { root.term-run-command(c); }
+                term-launch-host => { root.term-launch-host(); }
+                term-clear => { root.term-clear(); }
+
+                edit-new => { root.edit-new(); }
+                edit-open-preset(p) => { root.edit-open-preset(p); }
+                edit-save(p, c) => { root.edit-save(p, c); }
+
+                settings-mode-selected(m) => { root.current-mode = m; root.mode-changed(m); }
+                settings-toggle-theme => { root.toggle-theme(); }
+                settings-toggle-shell-bar => { root.toggle-shell-controls(); }
+                settings-reset => { root.settings-reset(); }
+            }
+
+            // --- Mode 1: macOS OS X Yosemite ---
+            if root.current-mode == 1 : MacosMode {
+                selected-wallpaper: root.selected-wallpaper;
+                wallpaper-selected(w) => { root.selected-wallpaper = w; root.wallpaper-selected(w); }
+                clock-time: root.clock-time;
+                clock-date: root.clock-date;
+
+                files-current-path: root.files-current-path;
+                files-items: root.files-items;
+                files-selected-index: root.files-selected-index;
+                files-status-text: root.files-status-text;
+                files-error-text: root.files-error-text;
+                files-has-error: root.files-has-error;
+
+                term-output: root.term-output;
+                host-terminal-name: root.host-terminal-name;
+
+                edit-file-path: root.edit-file-path;
+                edit-file-content: root.edit-file-content;
+                edit-status: root.edit-status;
+                edit-is-modified: root.edit-is-modified;
+
+                app-action(act) => { root.app-action(act); }
+                files-navigate(p) => { root.files-navigate(p); }
+                files-navigate-up => { root.files-navigate-up(); }
+                files-navigate-back => { root.files-navigate-back(); }
+                files-refresh => { root.files-refresh(); }
+                files-open-item(p, is_dir) => { root.files-open-item(p, is_dir); }
+
+                term-run-command(c) => { root.term-run-command(c); }
+                term-launch-host => { root.term-launch-host(); }
+                term-clear => { root.term-clear(); }
+
+                edit-new => { root.edit-new(); }
+                edit-open-preset(p) => { root.edit-open-preset(p); }
+                edit-save(p, c) => { root.edit-save(p, c); }
+
+                settings-mode-selected(m) => { root.current-mode = m; root.mode-changed(m); }
+                settings-toggle-theme => { root.toggle-theme(); }
+                settings-toggle-shell-bar => { root.toggle-shell-controls(); }
+                settings-reset => { root.settings-reset(); }
+            }
+
+            // --- Mode 2: Android 10 ---
+            if root.current-mode == 2 : AndroidMode {
+                selected-wallpaper: root.selected-wallpaper;
+                wallpaper-selected(w) => { root.selected-wallpaper = w; root.wallpaper-selected(w); }
+                clock-time: root.clock-time;
+                clock-date: root.clock-date;
+
+                files-current-path: root.files-current-path;
+                files-items: root.files-items;
+                files-selected-index: root.files-selected-index;
+                files-status-text: root.files-status-text;
+                files-error-text: root.files-error-text;
+                files-has-error: root.files-has-error;
+
+                term-output: root.term-output;
+                host-terminal-name: root.host-terminal-name;
+
+                edit-file-path: root.edit-file-path;
+                edit-file-content: root.edit-file-content;
+                edit-status: root.edit-status;
+                edit-is-modified: root.edit-is-modified;
+
+                app-action(act) => { root.app-action(act); }
+                files-navigate(p) => { root.files-navigate(p); }
+                files-navigate-up => { root.files-navigate-up(); }
+                files-navigate-back => { root.files-navigate-back(); }
+                files-refresh => { root.files-refresh(); }
+                files-open-item(p, is_dir) => { root.files-open-item(p, is_dir); }
+
+                term-run-command(c) => { root.term-run-command(c); }
+                term-launch-host => { root.term-launch-host(); }
+                term-clear => { root.term-clear(); }
+
+                edit-new => { root.edit-new(); }
+                edit-open-preset(p) => { root.edit-open-preset(p); }
+                edit-save(p, c) => { root.edit-save(p, c); }
+
+                settings-mode-selected(m) => { root.current-mode = m; root.mode-changed(m); }
+                settings-toggle-theme => { root.toggle-theme(); }
+                settings-toggle-shell-bar => { root.toggle-shell-controls(); }
+                settings-reset => { root.settings-reset(); }
+            }
+
+            // --- Mode 3: Aurora Tiling ---
+            if root.current-mode == 3 : AuroraMode {
+                selected-wallpaper: root.selected-wallpaper;
+                wallpaper-selected(w) => { root.selected-wallpaper = w; root.wallpaper-selected(w); }
+                clock-time: root.clock-time;
+                clock-date: root.clock-date;
+
+                files-current-path: root.files-current-path;
+                files-items: root.files-items;
+                files-selected-index: root.files-selected-index;
+                files-status-text: root.files-status-text;
+                files-error-text: root.files-error-text;
+                files-has-error: root.files-has-error;
+
+                term-output: root.term-output;
+                host-terminal-name: root.host-terminal-name;
+
+                edit-file-path: root.edit-file-path;
+                edit-file-content: root.edit-file-content;
+                edit-status: root.edit-status;
+                edit-is-modified: root.edit-is-modified;
+
+                app-action(act) => { root.app-action(act); }
+                files-navigate(p) => { root.files-navigate(p); }
+                files-navigate-up => { root.files-navigate-up(); }
+                files-navigate-back => { root.files-navigate-back(); }
+                files-refresh => { root.files-refresh(); }
+                files-open-item(p, is_dir) => { root.files-open-item(p, is_dir); }
+
+                term-run-command(c) => { root.term-run-command(c); }
+                term-launch-host => { root.term-launch-host(); }
+                term-clear => { root.term-clear(); }
+
+                edit-new => { root.edit-new(); }
+                edit-open-preset(p) => { root.edit-open-preset(p); }
+                edit-save(p, c) => { root.edit-save(p, c); }
+
+                settings-mode-selected(m) => { root.current-mode = m; root.mode-changed(m); }
+                settings-toggle-theme => { root.toggle-theme(); }
+                settings-toggle-shell-bar => { root.toggle-shell-controls(); }
+                settings-reset => { root.settings-reset(); }
+            }
+        }
+    }

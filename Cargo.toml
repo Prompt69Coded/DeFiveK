@@ -1,0 +1,19 @@
+[package]
+name = "defivek"
+version = "0.2.0"
+edition = "2021"
+description = "DeFiveK Desktop - Modular Linux Desktop Shell (Phase 2 Functional Shell)"
+authors = ["DeFiveK Desktop Contributors"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+keywords = ["desktop", "slint", "shell", "linux", "gui"]
+
+[dependencies]
+slint = "1.8"
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+directories = "5.0"
+chrono = "0.4"
+
+[build-dependencies]
+slint-build = "1.8"

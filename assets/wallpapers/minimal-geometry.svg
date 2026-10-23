@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="geo-base" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f19"/>
+      <stop offset="50%" stop-color="#141a29"/>
+      <stop offset="100%" stop-color="#080b12"/>
+    </linearGradient>
+    <linearGradient id="face-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="face-2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="face-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="face-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#geo-base)"/>
+
+  <!-- Low-Poly Faceted Mesh Structure -->
+  <g stroke="#0f172a" stroke-width="1.5">
+    <!-- Row 1 -->
+    <polygon points="0,0 480,0 240,270" fill="url(#face-1)"/>
+    <polygon points="480,0 960,0 720,270" fill="url(#face-2)"/>
+    <polygon points="480,0 720,270 240,270" fill="url(#face-1)"/>
+    <polygon points="960,0 1440,0 1200,270" fill="url(#face-1)"/>
+    <polygon points="960,0 1200,270 720,270" fill="url(#face-2)"/>
+    <polygon points="1440,0 1920,0 1680,270" fill="url(#face-2)"/>
+    <polygon points="1440,0 1680,270 1200,270" fill="url(#face-1)"/>
+
+    <!-- Row 2 -->
+    <polygon points="0,0 240,270 0,540" fill="url(#face-2)"/>
+    <polygon points="240,270 720,270 480,540" fill="url(#face-1)"/>
+    <polygon points="240,270 480,540 0,540" fill="url(#face-2)"/>
+    <polygon points="720,270 1200,270 960,540" fill="url(#face-2)"/>
+    <polygon points="720,270 960,540 480,540" fill="url(#face-1)"/>
+    <polygon points="1200,270 1680,270 1440,540" fill="url(#face-1)"/>
+    <polygon points="1200,270 1440,540 960,540" fill="url(#face-2)"/>
+    <polygon points="1680,270 1920,0 1920,540" fill="url(#face-1)"/>
+    <polygon points="1680,270 1920,540 1440,540" fill="url(#face-2)"/>
+
+    <!-- Central Accent Facets -->
+    <polygon points="480,540 960,540 720,810" fill="url(#face-accent)" opacity="0.85"/>
+    <polygon points="960,540 1440,540 1200,810" fill="url(#face-purple)" opacity="0.75"/>
+    <polygon points="960,540 1200,810 720,810" fill="url(#face-2)"/>
+
+    <!-- Row 3 Outer -->
+    <polygon points="0,540 480,540 240,810" fill="url(#face-1)"/>
+    <polygon points="0,540 240,810 0,1080" fill="url(#face-2)"/>
+    <polygon points="480,540 720,810 240,810" fill="url(#face-2)"/>
+    <polygon points="1440,540 1920,540 1680,810" fill="url(#face-1)"/>
+    <polygon points="1440,540 1680,810 1200,810" fill="url(#face-2)"/>
+    <polygon points="1920,540 1920,1080 1680,810" fill="url(#face-2)"/>
+
+    <!-- Row 4 (Bottom) -->
+    <polygon points="0,1080 240,810 480,1080" fill="url(#face-1)"/>
+    <polygon points="240,810 720,810 480,1080" fill="url(#face-2)"/>
+    <polygon points="720,810 960,1080 480,1080" fill="url(#face-1)"/>
+    <polygon points="720,810 1200,810 960,1080" fill="url(#face-accent)" opacity="0.6"/>
+    <polygon points="1200,810 1440,1080 960,1080" fill="url(#face-2)"/>
+    <polygon points="1200,810 1680,810 1440,1080" fill="url(#face-1)"/>
+    <polygon points="1680,810 1920,1080 1440,1080" fill="url(#face-2)"/>
+  </g>
+</svg>

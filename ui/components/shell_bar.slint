@@ -1,0 +1,246 @@
+import { ShellPalette } from "theme.slint";
+
+export component ShellBar inherits Rectangle {
+    in-out property <int> current-mode: 0;
+    in-out property <bool> dark-mode: true;
+    in-out property <bool> is-expanded: true;
+    in-out property <string> status-text: "Debian 13 ARM64";
+
+    callback mode-selected(int);
+    callback toggle-theme();
+    callback toggle-collapse();
+
+    height: root.is-expanded ? 46px : 26px;
+    background: ShellPalette.surface;
+
+    // Thin bottom separator line
+    Rectangle {
+        y: parent.height - 1px;
+        width: parent.width;
+        height: 1px;
+        background: ShellPalette.border;
+    }
+
+    HorizontalLayout {
+        padding-left: 12px;
+        padding-right: 12px;
+        spacing: 10px;
+        alignment: center;
+
+        // Brand Emblem
+        Rectangle {
+            width: root.is-expanded ? 140px : 100px;
+            HorizontalLayout {
+                spacing: 6px;
+                alignment: start;
+                Rectangle {
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 9px;
+                    background: ShellPalette.accent;
+                    Text {
+                        text: "✦";
+                        color: #ffffff;
+                        font-size: 11px;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
+                Text {
+                    text: root.is-expanded ? "DEFIVEK DESKTOP" : "DEFIVEK";
+                    font-size: 11px;
+                    font-weight: 700;
+                    color: ShellPalette.text-primary;
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        // Mode Switcher Segmented Control (Visible when expanded)
+        if root.is-expanded : HorizontalLayout {
+            spacing: 6px;
+
+            // Windows Mode Button
+            Rectangle {
+                width: 120px;
+                height: 30px;
+                border-radius: 6px;
+                background: root.current-mode == 0 ? ShellPalette.accent : (win-touch.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant);
+                border-width: 1px;
+                border-color: root.current-mode == 0 ? ShellPalette.accent-hover : ShellPalette.border-subtle;
+
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: 6px;
+                    Text {
+                        text: "🪟";
+                        font-size: 11px;
+                        vertical-alignment: center;
+                    }
+                    Text {
+                        text: "Windows 7";
+                        font-size: 11px;
+                        font-weight: root.current-mode == 0 ? 700 : 500;
+                        color: root.current-mode == 0 ? #ffffff : ShellPalette.text-primary;
+                        vertical-alignment: center;
+                    }
+                }
+
+                win-touch := TouchArea {
+                    clicked => { root.mode-selected(0); }
+                }
+            }
+
+            // macOS Mode Button
+            Rectangle {
+                width: 130px;
+                height: 30px;
+                border-radius: 6px;
+                background: root.current-mode == 1 ? ShellPalette.accent : (mac-touch.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant);
+                border-width: 1px;
+                border-color: root.current-mode == 1 ? ShellPalette.accent-hover : ShellPalette.border-subtle;
+
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: 6px;
+                    Text {
+                        text: "🍎";
+                        font-size: 11px;
+                        vertical-alignment: center;
+                    }
+                    Text {
+                        text: "OS X Yosemite";
+                        font-size: 11px;
+                        font-weight: root.current-mode == 1 ? 700 : 500;
+                        color: root.current-mode == 1 ? #ffffff : ShellPalette.text-primary;
+                        vertical-alignment: center;
+                    }
+                }
+
+                mac-touch := TouchArea {
+                    clicked => { root.mode-selected(1); }
+                }
+            }
+
+            // Android Mode Button
+            Rectangle {
+                width: 115px;
+                height: 30px;
+                border-radius: 6px;
+                background: root.current-mode == 2 ? ShellPalette.accent : (and-touch.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant);
+                border-width: 1px;
+                border-color: root.current-mode == 2 ? ShellPalette.accent-hover : ShellPalette.border-subtle;
+
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: 6px;
+                    Text {
+                        text: "🤖";
+                        font-size: 11px;
+                        vertical-alignment: center;
+                    }
+                    Text {
+                        text: "Android 10";
+                        font-size: 11px;
+                        font-weight: root.current-mode == 2 ? 700 : 500;
+                        color: root.current-mode == 2 ? #ffffff : ShellPalette.text-primary;
+                        vertical-alignment: center;
+                    }
+                }
+
+                and-touch := TouchArea {
+                    clicked => { root.mode-selected(2); }
+                }
+            }
+
+            // Aurora Mode Button
+            Rectangle {
+                width: 115px;
+                height: 30px;
+                border-radius: 6px;
+                background: root.current-mode == 3 ? ShellPalette.accent : (aur-touch.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant);
+                border-width: 1px;
+                border-color: root.current-mode == 3 ? ShellPalette.accent-hover : ShellPalette.border-subtle;
+
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: 6px;
+                    Text {
+                        text: "⚡";
+                        font-size: 11px;
+                        vertical-alignment: center;
+                    }
+                    Text {
+                        text: "Aurora Tiling";
+                        font-size: 11px;
+                        font-weight: root.current-mode == 3 ? 700 : 500;
+                        color: root.current-mode == 3 ? #ffffff : ShellPalette.text-primary;
+                        vertical-alignment: center;
+                    }
+                }
+
+                aur-touch := TouchArea {
+                    clicked => { root.mode-selected(3); }
+                }
+            }
+        }
+
+        // Spacer to push right controls
+        Rectangle {
+            horizontal-stretch: 1;
+        }
+
+        // Theme Toggle Button
+        Rectangle {
+            width: root.is-expanded ? 96px : 32px;
+            height: 28px;
+            border-radius: 6px;
+            background: theme-touch.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant;
+            border-width: 1px;
+            border-color: ShellPalette.border;
+
+            HorizontalLayout {
+                alignment: center;
+                spacing: 5px;
+                Text {
+                    text: root.dark-mode ? "☾" : "☀";
+                    font-size: 12px;
+                    color: ShellPalette.text-primary;
+                    vertical-alignment: center;
+                }
+                if root.is-expanded : Text {
+                    text: root.dark-mode ? "Dark" : "Light";
+                    font-size: 11px;
+                    color: ShellPalette.text-primary;
+                    vertical-alignment: center;
+                }
+            }
+
+            theme-touch := TouchArea {
+                clicked => { root.toggle-theme(); }
+            }
+        }
+
+        // Collapse / Expand Toggle Button
+        Rectangle {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: col-touch.has-hover ? ShellPalette.surface-hover : ShellPalette.surface-variant;
+            border-width: 1px;
+            border-color: ShellPalette.border;
+
+            Text {
+                text: root.is-expanded ? "▲" : "▼";
+                font-size: 9px;
+                color: ShellPalette.text-secondary;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+
+            col-touch := TouchArea {
+                clicked => { root.toggle-collapse(); }
+            }
+        }
+    }
+}

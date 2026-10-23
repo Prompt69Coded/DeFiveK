@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="ocean-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#022c43"/>
+      <stop offset="40%" stop-color="#053f5e"/>
+      <stop offset="75%" stop-color="#115173"/>
+      <stop offset="100%" stop-color="#021d2d"/>
+    </linearGradient>
+    <linearGradient id="wave-1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#008891"/>
+      <stop offset="50%" stop-color="#00b4d8"/>
+      <stop offset="100%" stop-color="#06d6a0"/>
+    </linearGradient>
+    <linearGradient id="wave-2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#03045e"/>
+      <stop offset="50%" stop-color="#0077b6"/>
+      <stop offset="100%" stop-color="#0096c7"/>
+    </linearGradient>
+    <linearGradient id="wave-3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0077b6" stop-opacity="0.6"/>
+      <stop offset="50%" stop-color="#48cae4" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#90e0ef" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#ocean-bg)"/>
+
+  <!-- Flowing Organic Ribbon 1 -->
+  <path d="M-100 850 C 350 920 650 620 1050 720 C 1450 820 1650 650 2050 700 L 2050 1100 L -100 1100 Z" fill="url(#wave-2)" opacity="0.85"/>
+
+  <!-- Flowing Organic Ribbon 2 -->
+  <path d="M-100 680 C 420 540 780 840 1250 640 C 1620 480 1820 620 2050 560 L 2050 1100 L -100 1100 Z" fill="url(#wave-1)" opacity="0.75"/>
+
+  <!-- Fluid Crest Wave Ribbon 3 -->
+  <path d="M-100 480 C 380 320 840 560 1320 410 C 1720 290 1880 440 2050 390 L 2050 780 C 1750 720 1520 860 1150 720 C 720 580 320 740 -100 620 Z" fill="url(#wave-3)" opacity="0.45"/>
+
+  <!-- Subtle Translucent Aqua Accents -->
+  <path d="M-50 280 C 450 160 920 380 1420 260 C 1780 180 1950 290 2050 240 L 2050 340 C 1820 420 1550 320 1120 460 C 680 600 250 420 -50 480 Z" fill="#90e0ef" opacity="0.18"/>
+
+  <!-- Ambient Caustic Depth Particles -->
+  <g fill="#90e0ef" opacity="0.4">
+    <circle cx="340" cy="240" r="3.0"/>
+    <circle cx="580" cy="380" r="2.0"/>
+    <circle cx="890" cy="210" r="2.5"/>
+    <circle cx="1240" cy="320" r="3.5"/>
+    <circle cx="1620" cy="220" r="2.0"/>
+    <circle cx="1780" cy="360" r="3.0"/>
+  </g>
+</svg>
